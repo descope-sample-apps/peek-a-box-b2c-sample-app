@@ -11,7 +11,7 @@ import "./globals.css"
 
 
 export const metadata: Metadata = {
-  title: 'Unboxably | Shop',
+  title: 'Peek A Box | Shop',
   description: 'Shop our collection. Sign in for a seamless checkout experience.',
   icons: {
     icon: [

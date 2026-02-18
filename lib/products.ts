@@ -4,7 +4,7 @@ export interface Product {
   description: string
   price: number
   image: string
-  category: "chaos" | "cursed" | "premium"
+  category: "bestsellers" | "new" | "premium"
   badge?: string
 }
 
@@ -15,7 +15,7 @@ export const products: Product[] = [
     description: "Mildly Concerning",
     price: 9.99,
     image: "/placeholder.svg?height=400&width=400",
-    category: "chaos",
+    category: "bestsellers",
     badge: "Bestseller",
   },
   {
@@ -24,8 +24,7 @@ export const products: Product[] = [
     description: "Definitely Haunted",
     price: 13.99,
     image: "/placeholder.svg?height=400&width=400",
-    category: "cursed",
-    badge: "Spooky",
+    category: "new",
   },
   {
     id: "box-7",
@@ -33,7 +32,7 @@ export const products: Product[] = [
     description: "Suspiciously Light",
     price: 7.77,
     image: "/placeholder.svg?height=400&width=400",
-    category: "chaos",
+    category: "bestsellers",
   },
   
   {
@@ -42,8 +41,7 @@ export const products: Product[] = [
     description: "Legally We Cannot Discuss This",
     price: 6.66,
     image: "/placeholder.svg?height=400&width=400",
-    category: "cursed",
-    badge: "Forbidden",
+    category: "new",
   },
   {
     id: "box-42",
@@ -59,7 +57,7 @@ export const products: Product[] = [
     description: "Too Many Nines",
     price: 9.99,
     image: "/placeholder.svg?height=400&width=400",
-    category: "chaos",
+    category: "bestsellers",
   },
   {
     id: "box-67",
@@ -76,8 +74,7 @@ export const products: Product[] = [
     description: "The First One. Or Is It?",
     price: 0.01,
     image: "/placeholder.svg?height=400&width=400",
-    category: "cursed",
-    badge: "Origin",
+    category: "new",
   },
   {
     id: "box-π",
@@ -86,7 +83,7 @@ export const products: Product[] = [
     price: 31.41,
     image: "/placeholder.svg?height=400&width=400",
     category: "premium",
-    badge: "Irrational",
+    badge: "nerd alert"
   },
 ]
 

@@ -42,13 +42,12 @@ export default function CartStepUpPage() {
   if (!isAuthenticated) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-background">
-        <p className="text-sm text-muted-foreground">Redirecting to sign in...</p>
+        <p className="text-base text-muted-foreground">Redirecting to sign in...</p>
       </div>
     )
   }
 
   const navItems = [
-    { name: "Shop", link: "/" },
     { name: "Cart", link: "/cart" },
   ]
 
@@ -59,7 +58,7 @@ export default function CartStepUpPage() {
       <main className="mx-auto max-w-md px-6 pb-24 pt-28">
         <Link
           href="/cart"
-          className="inline-flex items-center gap-2 text-sm text-muted-foreground transition-colors hover:text-foreground"
+          className="inline-flex items-center gap-2 text-base text-muted-foreground transition-colors hover:text-foreground"
         >
           <ArrowLeft className="h-4 w-4" />
           Back to cart
@@ -68,7 +67,7 @@ export default function CartStepUpPage() {
         <h1 className="mt-8 text-2xl font-semibold tracking-tight">
           Verify your identity
         </h1>
-        <p className="mt-2 text-sm text-muted-foreground">
+        <p className="mt-2 text-base text-muted-foreground sm:text-lg">
           For your security, please sign in again before completing your order.
         </p>
 

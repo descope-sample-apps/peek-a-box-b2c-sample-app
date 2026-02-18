@@ -40,7 +40,7 @@ export function ProductCard({ product }: ProductCardProps) {
           <Package className="h-16 w-16 text-foreground/10 transition-transform duration-500 group-hover:scale-110 group-hover:rotate-3" />
         </div>
         {product.badge && (
-          <span className="absolute left-3 top-3 rounded-full bg-foreground px-3 py-1 text-[10px] font-medium uppercase tracking-wider text-background">
+          <span className="absolute left-3 top-3 rounded-full bg-foreground px-3 py-1 text-xs font-medium uppercase tracking-wider text-background">
             {product.badge}
           </span>
         )}
@@ -60,11 +60,11 @@ export function ProductCard({ product }: ProductCardProps) {
       </div>
       <div className="mt-4">
         <div className="flex items-start justify-between gap-4">
-          <h3 className="font-medium leading-tight">{product.name}</h3>
-          <p className="font-medium tabular-nums">${product.price.toFixed(2)}</p>
+          <h3 className="text-base font-medium leading-tight sm:text-lg">{product.name}</h3>
+          <p className="text-base font-medium tabular-nums sm:text-lg">${product.price.toFixed(2)}</p>
         </div>
-        <p className="mt-1.5 text-sm italic text-muted-foreground">
-          "{product.description}"
+        <p className="mt-1.5 text-base italic text-muted-foreground">
+          {product.description}
         </p>
       </div>
     </motion.article>

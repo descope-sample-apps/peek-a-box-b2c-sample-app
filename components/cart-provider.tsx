@@ -2,7 +2,7 @@
 
 import { createContext, useContext, useState, useCallback, useEffect, type ReactNode } from "react"
 
-const CART_STORAGE_KEY = "unboxably-cart"
+const CART_STORAGE_KEY = "peek-a-box-cart"
 
 export interface CartItem {
   id: string

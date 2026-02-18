@@ -30,8 +30,9 @@ export default function CartPage() {
   const isEmpty = items.length === 0
 
   const navItems = [
-    { name: "Shop", link: "/" },
-    { name: "Cart", link: "/cart" },
+    { name: "Bestsellers", link: "/#bestsellers" },
+    { name: "New Arrivals", link: "/#newArrivals" },
+    { name: "Premium", link: "/#premium" },
   ]
 
   return (
@@ -41,13 +42,13 @@ export default function CartPage() {
       <main className="mx-auto max-w-5xl px-6 pb-24 pt-28">
         <Link
           href="/"
-          className="inline-flex items-center gap-2 text-sm text-muted-foreground transition-colors hover:text-foreground"
+          className="inline-flex items-center gap-2 text-base text-muted-foreground transition-colors hover:text-foreground"
         >
           <ArrowLeft className="h-4 w-4" />
           Back to store
         </Link>
 
-        <h1 className="mt-8 text-3xl font-semibold tracking-tight">
+        <h1 className="mt-8 text-4xl font-semibold tracking-tight sm:text-5xl">
           Your cart
         </h1>
 
@@ -62,11 +63,11 @@ export default function CartPage() {
               <div className="flex h-20 w-20 items-center justify-center rounded-full bg-muted">
                 <Package className="h-8 w-8 text-muted-foreground" />
               </div>
-              <p className="mt-6 text-lg text-muted-foreground">Your cart is empty</p>
-              <p className="mt-2 text-sm text-muted-foreground">
+              <p className="mt-6 text-2xl font-semibold text-foreground sm:text-3xl">Your cart is empty.</p>
+              <p className="mt-3 text-xl text-muted-foreground sm:text-2xl">
                 Add items from the store to get started.
               </p>
-              <Button asChild size="lg" className="mt-8 rounded-full px-8">
+              <Button asChild size="lg" className="mt-8 rounded-full px-8 text-base sm:text-lg">
                 <Link href="/">Continue shopping</Link>
               </Button>
             </motion.div>
@@ -102,13 +103,13 @@ export default function CartPage() {
                       <div className="flex flex-1 flex-col justify-between">
                         <div className="flex justify-between">
                           <div>
-                            <h3 className="font-medium">{item.name}</h3>
-                            <p className="mt-1 text-sm text-muted-foreground">
+                            <h3 className="text-base font-medium sm:text-lg">{item.name}</h3>
+                            <p className="mt-1 text-base text-muted-foreground">
                               ${item.price.toFixed(2)} each
                             </p>
                           </div>
                           <div className="flex items-center gap-4">
-                            <p className="font-medium tabular-nums">
+                            <p className="text-base font-medium tabular-nums sm:text-lg">
                               ${item.price.toFixed(2)}
                             </p>
                             <button
@@ -133,8 +134,8 @@ export default function CartPage() {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.2 }}
                 >
-                  <h2 className="font-medium">Order summary</h2>
-                  <dl className="mt-6 space-y-4 text-sm">
+                  <h2 className="text-base font-medium sm:text-lg">Order summary</h2>
+                  <dl className="mt-6 space-y-4 text-base">
                     <div className="flex justify-between">
                       <dt className="text-muted-foreground">Items</dt>
                       <dd className="tabular-nums">{items.length}</dd>
@@ -147,7 +148,7 @@ export default function CartPage() {
                   <button
                     onClick={handleCheckout}
                     disabled={isSessionLoading}
-                    className="mt-6 w-full rounded-full bg-foreground py-3.5 text-sm font-medium text-background transition-colors hover:bg-foreground/90 disabled:opacity-50"
+                    className="mt-6 w-full rounded-full bg-foreground py-3.5 text-base font-medium text-background transition-colors hover:bg-foreground/90 disabled:opacity-50 sm:text-lg"
                   >
                     {isSessionLoading
                       ? "Loading..."
@@ -156,12 +157,12 @@ export default function CartPage() {
                         : "Sign in to checkout"}
                   </button>
                   {items.length >= 2 && isAuthenticated && !isSessionLoading && (
-                    <p className="mt-4 text-center text-xs text-muted-foreground">
+                    <p className="mt-4 text-center text-base text-muted-foreground sm:text-lg">
                       Due to the high value of items in your cart, you'll be asked to re-verify your identity before your order is confirmed.
                     </p>
                   )}
                   {!isAuthenticated && !isSessionLoading && (
-                    <p className="mt-4 text-center text-xs text-muted-foreground">
+                    <p className="mt-4 text-center text-base text-muted-foreground sm:text-lg">
                       Sign in to complete your purchase.
                     </p>
                   )}

@@ -81,7 +81,7 @@ export default function LoginPage() {
   if (isAuthenticated) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-background">
-        <p className="text-sm text-muted-foreground">Redirecting...</p>
+        <p className="text-base text-muted-foreground">Redirecting...</p>
       </div>
     )
   }
@@ -91,20 +91,20 @@ export default function LoginPage() {
       <div className="relative hidden flex-1 flex-col justify-between bg-foreground p-12 text-background lg:flex">
         <Link
           href="/"
-          className="inline-flex items-center gap-2 text-sm text-background/70 transition-colors hover:text-background"
+          className="inline-flex items-center gap-2 text-base text-background/70 transition-colors hover:text-background"
         >
           <ArrowLeft className="h-4 w-4" />
           Back to store
         </Link>
 
         <div>
-          <h1 className="text-4xl font-semibold tracking-tight">Unboxably</h1>
+          <h1 className="text-4xl font-semibold tracking-tight">Logo placeholder</h1>
           <p className="mt-4 max-w-md text-lg text-background/70">
             Sign in or create an account to checkout and manage your orders.
           </p>
         </div>
 
-        <p className="text-sm text-background/50">
+        <p className="text-base text-background/50">
           Secure authentication powered by Descope
         </p>
       </div>
@@ -113,7 +113,7 @@ export default function LoginPage() {
         <div className="absolute left-6 top-6 p-6 lg:hidden">
           <Link
             href="/"
-            className="inline-flex items-center gap-2 text-sm text-muted-foreground transition-colors hover:text-foreground"
+            className="inline-flex items-center gap-2 text-base text-muted-foreground transition-colors hover:text-foreground"
           >
             <ArrowLeft className="h-4 w-4" />
             Back to store

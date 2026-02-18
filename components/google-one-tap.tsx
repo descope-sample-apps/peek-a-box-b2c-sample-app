@@ -3,8 +3,11 @@
 import { useEffect, useRef, useCallback } from "react"
 import { useDescope, useSession } from "@descope/nextjs-sdk/client"
 
+const WELCOME_DISMISSED_KEY = "descope-b2c-welcome-dismissed"
+
 /**
  * Descope Google One Tap: shows Google's one-click sign-in when user is not authenticated.
+ * Only runs after the welcome popup has been dismissed.
  * Requires Google OAuth provider with Implicit grant in Descope Console.
  * Renders nothing; only triggers the One Tap prompt.
  */
@@ -37,11 +40,23 @@ export function GoogleOneTap() {
     }
   }, [sdk])
 
-  // Only show One Tap when we know the user is not logged in
+  // Show One Tap when user is not logged in and welcome popup has been dismissed (on mount or when dismissed)
   useEffect(() => {
-    if (!isAuthenticated && !isSessionLoading) {
+    const welcomeDismissed = typeof window !== "undefined" && localStorage.getItem(WELCOME_DISMISSED_KEY) === "true"
+    if (!isAuthenticated && !isSessionLoading && welcomeDismissed) {
       startOneTap()
     }
+  }, [isAuthenticated, isSessionLoading, startOneTap])
+
+  // When welcome popup is dismissed, show One Tap immediately without refresh
+  useEffect(() => {
+    const onWelcomeDismissed = () => {
+      if (!isAuthenticated && !isSessionLoading) {
+        startOneTap()
+      }
+    }
+    window.addEventListener("welcome-dismissed", onWelcomeDismissed)
+    return () => window.removeEventListener("welcome-dismissed", onWelcomeDismissed)
   }, [isAuthenticated, isSessionLoading, startOneTap])
 
   return null

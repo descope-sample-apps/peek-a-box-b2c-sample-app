@@ -19,7 +19,6 @@ export default function ProfilePage() {
   }
 
   const navItems = [
-    { name: "Shop", link: "/" },
     { name: "Cart", link: "/cart" },
     { name: "Profile", link: "/profile" },
   ]
@@ -31,7 +30,7 @@ export default function ProfilePage() {
       <main className="mx-auto max-w-2xl px-6 pb-24 pt-28">
         <Link
           href="/"
-          className="inline-flex items-center gap-2 text-sm text-muted-foreground transition-colors hover:text-foreground"
+          className="inline-flex items-center gap-2 text-base text-muted-foreground transition-colors hover:text-foreground"
         >
           <ArrowLeft className="h-4 w-4" />
           Back to store

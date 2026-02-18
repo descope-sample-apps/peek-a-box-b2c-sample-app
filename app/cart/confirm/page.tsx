@@ -44,7 +44,7 @@ export default function OrderConfirmPage() {
   if (items.length === 0 && snapshot === null) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-background">
-        <p className="text-sm text-muted-foreground">Redirecting...</p>
+        <p className="text-base text-muted-foreground">Redirecting...</p>
       </div>
     )
   }
@@ -52,7 +52,7 @@ export default function OrderConfirmPage() {
   if (snapshot === null) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-background">
-        <p className="text-sm text-muted-foreground">Loading...</p>
+        <p className="text-base text-muted-foreground">Loading...</p>
       </div>
     )
   }
@@ -60,7 +60,6 @@ export default function OrderConfirmPage() {
   const reveals = snapshot
 
   const navItems = [
-    { name: "Shop", link: "/" },
     { name: "Cart", link: "/cart" },
   ]
 
@@ -71,7 +70,7 @@ export default function OrderConfirmPage() {
       <main className="mx-auto max-w-2xl px-6 pb-24 pt-28">
         <Link
           href="/"
-          className="inline-flex items-center gap-2 text-sm text-muted-foreground transition-colors hover:text-foreground"
+          className="inline-flex items-center gap-2 text-base text-muted-foreground transition-colors hover:text-foreground"
         >
           <ArrowLeft className="h-4 w-4" />
           Back to store
@@ -91,7 +90,7 @@ export default function OrderConfirmPage() {
             <p className="mt-4 text-lg">
               Thank you, <span className="font-semibold">{userName}</span>!
             </p>
-            <p className="mt-1 text-muted-foreground">
+            <p className="mt-1 text-base text-muted-foreground sm:text-lg">
               Your order has been placed. Here's what you purchased:
             </p>
           </div>
@@ -110,7 +109,7 @@ export default function OrderConfirmPage() {
                     <Package className="h-5 w-5" />
                   </div>
                   <div>
-                    <p className="text-sm text-muted-foreground">
+                    <p className="text-base text-muted-foreground sm:text-lg">
                       {item.boxId.replace("box-", "Item ")}
                     </p>
                     <p className="mt-1 text-lg font-medium">{item.reveal}</p>
@@ -121,7 +120,7 @@ export default function OrderConfirmPage() {
           </div>
 
           <div className="mt-12 text-center">
-            <Button asChild size="lg" className="rounded-full px-8">
+            <Button asChild size="lg" className="rounded-full px-8 text-base sm:text-lg">
               <Link href="/">Continue shopping</Link>
             </Button>
           </div>

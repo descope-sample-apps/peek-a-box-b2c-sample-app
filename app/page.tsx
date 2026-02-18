@@ -9,7 +9,7 @@ import { products } from "@/lib/products"
 import { useCart } from "@/components/cart-provider"
 import { GoogleOneTap } from "@/components/google-one-tap"
 import { useDescope, useSession } from "@descope/nextjs-sdk/client"
-import { ShoppingCart, User, Package, LogOut } from "lucide-react"
+import { ShoppingCart, User, Package, LogOut, LogIn } from "lucide-react"
 import Link from "next/link"
 
 export default function StorePage() {
@@ -23,14 +23,13 @@ export default function StorePage() {
     await sdk?.logout?.()
     router.refresh()
   }
-  const chaos = products.filter((p) => p.category === "chaos")
-  const cursed = products.filter((p) => p.category === "cursed")
+  const bestsellers = products.filter((p) => p.category === "bestsellers")
+  const newArrivals = products.filter((p) => p.category === "new")
   const premium = products.filter((p) => p.category === "premium")
 
   const navItems = [
-    { name: "Shop", link: "/" },
-    { name: "Bestsellers", link: "#chaos" },
-    { name: "New", link: "#cursed" },
+    { name: "Bestsellers", link: "#bestsellers" },
+    { name: "New Arrivals", link: "#newArrivals" },
     { name: "Premium", link: "#premium" },
   ]
 
@@ -42,21 +41,31 @@ export default function StorePage() {
 
       {/* Top bar */}
       <div className="fixed right-6 top-6 z-[5000] flex items-center gap-3">
+        {!isAuthenticated && (
+          <Link
+            href="/login"
+            className="flex h-10 items-center gap-2 rounded-full border border-foreground/10 bg-background/80 px-4 py-2 backdrop-blur-md transition-colors hover:bg-muted"
+            aria-label="Log in"
+          >
+            <LogIn className="h-4 w-4" />
+            <span className="text-base font-medium">Log in</span>
+          </Link>
+        )}
         <Link
           href="/cart"
           className="relative flex h-10 w-10 items-center justify-center rounded-full border border-foreground/10 bg-background/80 backdrop-blur-md transition-colors hover:bg-muted"
         >
           <ShoppingCart className="h-4 w-4" />
           {items.length > 0 && (
-            <span className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-foreground text-xs font-medium text-background">
+            <span className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-foreground text-sm font-medium text-background">
               {items.reduce((acc, item) => acc + item.quantity, 0)}
             </span>
           )}
         </Link>
         <Link
-          href={isAuthenticated ? "/profile" : "/login"}
+          href="/profile"
           className="flex h-10 w-10 items-center justify-center rounded-full border border-foreground/10 bg-background/80 backdrop-blur-md transition-colors hover:bg-muted"
-          aria-label={isAuthenticated ? "Profile" : "Sign in"}
+          aria-label="Profile"
         >
           <User className="h-4 w-4" />
         </Link>
@@ -68,7 +77,7 @@ export default function StorePage() {
             aria-label="Log out"
           >
             <LogOut className="h-4 w-4" />
-            <span className="text-sm font-medium">Log out</span>
+            <span className="text-base font-medium">Log out</span>
           </button>
         )}
       </div>
@@ -76,47 +85,42 @@ export default function StorePage() {
       {/* Hero */}
       <section className="relative flex min-h-[85vh] flex-col items-center justify-center overflow-hidden px-6">
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-muted via-background to-background" />
-        
+
         <div className="relative z-10 mx-auto max-w-4xl text-center">
-          <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-foreground/10 bg-muted/50 px-4 py-1.5 text-sm text-muted-foreground">
+          <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-foreground/10 bg-muted/50 px-4 py-1.5 text-base text-muted-foreground sm:text-lg">
             <Package className="h-4 w-4" />
-            Contents revealed after purchase
+            Contents revealed after checkout
           </div>
-          
+
           <TextGenerateEffect
             words="Shop the collection"
             className="text-5xl font-semibold tracking-tight text-foreground sm:text-7xl"
             duration={0.3}
           />
-          
-          <p className="mx-auto mt-8 max-w-xl text-lg text-muted-foreground">
-            Discover something new. Curated picks and everyday essentials.
+          <p className="mx-auto mt-8 max-w-xl text-muted-foreground">
+            <span className="text-lg sm:text-xl">Choose from our curated selection of mystery boxes.</span>
             <br />
-            <span className="text-sm">No refunds. No regrets. Probably.</span>
+            <span className="text-base sm:text-lg">No refunds. No regrets. Probably.</span>
           </p>
-
           <div className="mt-10 flex flex-wrap items-center justify-center gap-4">
-            <Button asChild size="lg" className="rounded-full px-8">
-              <Link href="#chaos">Shop now</Link>
-            </Button>
-            <Button asChild variant="outline" size="lg" className="rounded-full px-8 bg-transparent">
-              <Link href="#premium">View premium</Link>
+            <Button asChild size="lg" className="rounded-full px-8 text-base sm:text-lg">
+              <Link href="#bestsellers">Shop now</Link>
             </Button>
           </div>
         </div>
       </section>
 
       {/* Bestsellers */}
-      <section id="chaos" className="px-6 py-24">
+      <section id="bestsellers" className="px-6 py-24">
         <div className="mx-auto max-w-6xl">
           <div className="mb-12">
             <h2 className="text-3xl font-semibold tracking-tight">Bestsellers</h2>
-            <p className="mt-2 text-muted-foreground">
+            <p className="mt-2 text-base text-muted-foreground sm:text-lg">
               Our most popular picks. Customer favorites.
             </p>
           </div>
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {chaos.map((product) => (
+            {bestsellers.map((product) => (
               <ProductCard key={product.id} product={product} />
             ))}
           </div>
@@ -124,16 +128,16 @@ export default function StorePage() {
       </section>
 
       {/* New Arrivals */}
-      <section id="cursed" className="bg-muted/30 px-6 py-24">
+      <section id="newArrivals" className="bg-muted/30 px-6 py-24">
         <div className="mx-auto max-w-6xl">
           <div className="mb-12">
             <h2 className="text-3xl font-semibold tracking-tight">New arrivals</h2>
-            <p className="mt-2 text-muted-foreground">
+            <p className="mt-2 text-base text-muted-foreground sm:text-lg">
               Fresh picks. Just landed.
             </p>
           </div>
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {cursed.map((product) => (
+            {newArrivals.map((product) => (
               <ProductCard key={product.id} product={product} />
             ))}
           </div>
@@ -145,8 +149,8 @@ export default function StorePage() {
         <div className="mx-auto max-w-6xl">
           <div className="mb-12">
             <h2 className="text-3xl font-semibold tracking-tight">Premium</h2>
-            <p className="mt-2 text-muted-foreground">
-              Quality you can feel. Worth the upgrade.
+            <p className="mt-2 text-base text-muted-foreground sm:text-lg">
+              Bougie picks for bougie people. Worth the upgrade.
             </p>
           </div>
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
@@ -157,12 +161,12 @@ export default function StorePage() {
         </div>
       </section>
 
-      {/* Footer */}  
+      {/* Footer */}
       <footer className="border-t border-foreground/10 px-6 py-12">
         <div className="mx-auto max-w-6xl">
           <div className="flex flex-col items-center justify-between gap-6 sm:flex-row">
-            <p className="text-xl font-semibold tracking-tight">Unboxably</p>
-            <p className="text-sm text-muted-foreground">
+            <p className="text-xl font-semibold tracking-tight">Logo placeholder</p>
+            <p className="text-base text-muted-foreground sm:text-lg">
               B2C Sample App | Powered by Descope.
             </p>
           </div>
