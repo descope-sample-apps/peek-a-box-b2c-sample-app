@@ -20,6 +20,15 @@ export function WelcomePopup({ projectId = "" }: { projectId?: string }) {
     setOpen(!dismissed)
   }, [])
 
+  useEffect(() => {
+    if (open) {
+      document.body.classList.add("welcome-open")
+    } else {
+      document.body.classList.remove("welcome-open")
+    }
+    return () => document.body.classList.remove("welcome-open")
+  }, [open])
+
   const handleOpenChange = (next: boolean) => {
     if (!next) {
       localStorage.setItem(STORAGE_KEY, "true")
@@ -32,10 +41,10 @@ export function WelcomePopup({ projectId = "" }: { projectId?: string }) {
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogContent className="sm:max-w-5xl p-8 text-xl border-border/60 bg-background/90 backdrop-blur-xl shadow-2xl shadow-black/20 dark:shadow-black/40">
+      <DialogContent className="sm:max-w-5xl p-8 text-xl rounded-3xl border border-foreground/10 bg-background/80 backdrop-blur-md shadow-lg">
         <DialogHeader className="space-y-4">
           <DialogTitle className="text-center text-3xl sm:text-4xl">
-            Welcome to Peek-A-Box!
+            Welcome to peek-a-box!
           </DialogTitle>
           <DialogDescription className="text-xl pt-2">
             This is a <strong> sample retail app built by Descope</strong>. It demonstrates
@@ -44,7 +53,7 @@ export function WelcomePopup({ projectId = "" }: { projectId?: string }) {
           </DialogDescription>
         </DialogHeader>
 
-        <div className="rounded-xl border border-border/50 bg-muted/40 backdrop-blur-sm p-6 shadow-inner">
+        <div className="rounded-2xl border border-foreground/10 bg-muted/40 backdrop-blur-sm p-6 shadow-inner">
           <p className="mb-3 text-xl font-medium text-foreground">
             Suggested ways to explore the site:
           </p>
@@ -58,7 +67,7 @@ export function WelcomePopup({ projectId = "" }: { projectId?: string }) {
 
         <p className="text-xl text-muted-foreground">
           Currently using Descope Flows from Project ID:{" "}
-          <span className="inline-block rounded-md border border-border/50 bg-muted/40 backdrop-blur-sm px-3 py-1.5 font-mono font-medium text-foreground shadow-sm">
+          <span className="inline-block rounded-full border border-foreground/10 bg-muted/40 backdrop-blur-sm px-3 py-1.5 font-mono font-medium text-foreground shadow-sm">
             {projectId || "—"}
           </span>
         </p>

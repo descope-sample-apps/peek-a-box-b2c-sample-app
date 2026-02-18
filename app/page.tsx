@@ -40,16 +40,27 @@ export default function StorePage() {
       <FloatingNav navItems={navItems} />
 
       {/* Top bar */}
-      <div className="fixed right-6 top-6 z-[5000] flex items-center gap-3">
+      <div data-slot="top-bar" className="fixed right-6 top-6 z-[5000] flex items-center gap-3 transition-opacity duration-200">
         {!isAuthenticated && (
           <Link
             href="/login"
             className="flex h-10 items-center gap-2 rounded-full border border-foreground/10 bg-background/80 px-4 py-2 backdrop-blur-md transition-colors hover:bg-muted"
-            aria-label="Log in"
+            aria-label="Login"
           >
             <LogIn className="h-4 w-4" />
-            <span className="text-base font-medium">Log in</span>
+            <span className="text-base font-medium">Login</span>
           </Link>
+        )}
+        {isAuthenticated && (
+          <button
+            type="button"
+            onClick={handleLogout}
+            className="flex h-10 items-center gap-2 rounded-full border border-foreground/10 bg-background/80 px-4 py-2 backdrop-blur-md transition-colors hover:bg-muted"
+            aria-label="Logout"
+          >
+            <LogOut className="h-4 w-4" />
+            <span className="text-base font-medium">Logout</span>
+          </button>
         )}
         <Link
           href="/cart"
@@ -69,24 +80,13 @@ export default function StorePage() {
         >
           <User className="h-4 w-4" />
         </Link>
-        {isAuthenticated && (
-          <button
-            type="button"
-            onClick={handleLogout}
-            className="flex h-10 items-center gap-2 rounded-full border border-foreground/10 bg-background/80 px-4 py-2 backdrop-blur-md transition-colors hover:bg-muted"
-            aria-label="Log out"
-          >
-            <LogOut className="h-4 w-4" />
-            <span className="text-base font-medium">Log out</span>
-          </button>
-        )}
       </div>
 
       {/* Hero */}
-      <section className="relative flex min-h-[85vh] flex-col items-center justify-center overflow-hidden px-6">
+      <section className="relative flex min-h-[80vh] flex-col items-center justify-end overflow-hidden px-6 pt-28 pb-10 sm:min-h-[75vh] sm:pt-32 md:min-h-[68vh] md:pt-36 lg:min-h-[62vh] lg:pt-40">
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-muted via-background to-background" />
 
-        <div className="relative z-10 mx-auto max-w-4xl text-center">
+        <div className="relative z-10 mx-auto max-w-4xl text-center mb-16">
           <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-foreground/10 bg-muted/50 px-4 py-1.5 text-base text-muted-foreground sm:text-lg">
             <Package className="h-4 w-4" />
             Contents revealed after checkout
@@ -111,7 +111,7 @@ export default function StorePage() {
       </section>
 
       {/* Bestsellers */}
-      <section id="bestsellers" className="px-6 py-24">
+      <section id="bestsellers" className="bg-muted/30 px-6 pt-12 pb-24">
         <div className="mx-auto max-w-6xl">
           <div className="mb-12">
             <h2 className="text-3xl font-semibold tracking-tight">Bestsellers</h2>
@@ -128,7 +128,7 @@ export default function StorePage() {
       </section>
 
       {/* New Arrivals */}
-      <section id="newArrivals" className="bg-muted/30 px-6 py-24">
+      <section id="newArrivals" className="px-6 py-24">
         <div className="mx-auto max-w-6xl">
           <div className="mb-12">
             <h2 className="text-3xl font-semibold tracking-tight">New arrivals</h2>
@@ -145,7 +145,7 @@ export default function StorePage() {
       </section>
 
       {/* Premium */}
-      <section id="premium" className="px-6 py-24">
+      <section id="premium" className="bg-muted/30 px-6 py-24">
         <div className="mx-auto max-w-6xl">
           <div className="mb-12">
             <h2 className="text-3xl font-semibold tracking-tight">Premium</h2>
@@ -165,7 +165,18 @@ export default function StorePage() {
       <footer className="border-t border-foreground/10 px-6 py-12">
         <div className="mx-auto max-w-6xl">
           <div className="flex flex-col items-center justify-between gap-6 sm:flex-row">
-            <p className="text-xl font-semibold tracking-tight">Logo placeholder</p>
+            <Link href="/" className="flex items-center gap-2">
+              <img
+                src="/Peek-A-Box_logo-light.svg"
+                alt="Peek A Box"
+                className="h-8 dark:hidden"
+              />
+              <img
+                src="/Peek-A-Box_logo-dark.svg"
+                alt="Peek A Box"
+                className="hidden h-8 dark:block"
+              />
+            </Link>
             <p className="text-base text-muted-foreground sm:text-lg">
               B2C Sample App | Powered by Descope.
             </p>

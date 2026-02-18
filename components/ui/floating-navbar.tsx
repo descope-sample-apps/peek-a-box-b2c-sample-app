@@ -24,33 +24,42 @@ export const FloatingNav = ({
 }) => {
   return (
     <motion.div
+      data-slot="floating-nav"
       className={cn(
-        "fixed inset-x-0 top-6 z-[5000] mx-auto flex max-w-fit items-center justify-center gap-2 rounded-full border border-foreground/10 bg-background/80 px-4 py-3 shadow-lg backdrop-blur-md",
+        "fixed inset-x-0 top-6 z-[5000] mx-auto flex max-w-fit items-center justify-center gap-2 rounded-full border border-foreground/10 bg-background/80 px-4 py-3 shadow-lg backdrop-blur-md transition-opacity duration-200",
         className
       )}
     >
         <Link
           href="/"
-          className="flex items-center gap-2 rounded-lg transition-opacity hover:opacity-80 pr-4 mr-2 border-r border-foreground/10"
+          className="flex items-center rounded-lg transition-opacity hover:opacity-80"
           aria-label="Peek A Box – Home"
         >
-          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-foreground/10 bg-muted/80 text-sm font-semibold text-muted-foreground">
-            Logo
-          </div>
-
+          <img
+            src="/Peek-A-Box_logo-light.svg"
+            alt="Peek A Box"
+            className="h-8 w-auto dark:hidden"
+          />
+          <img
+            src="/Peek-A-Box_logo-dark.svg"
+            alt="Peek A Box"
+            className="hidden h-8 w-auto dark:block"
+          />
         </Link>
-        {navItems.map((navItem, idx) => (
-          <Link
-            key={`link-${idx}`}
-            href={navItem.link}
-            className={cn(
-              "relative flex items-center gap-1 px-3 py-2 text-base font-medium text-foreground/70 transition-colors hover:text-foreground"
-            )}
-          >
-            {navItem.icon && <span className="text-base">{navItem.icon}</span>}
-            <span>{navItem.name}</span>
-          </Link>
-        ))}
+        <div className="ml-2 border-l border-foreground/10 pl-4 flex items-center">
+          {navItems.map((navItem, idx) => (
+            <Link
+              key={`link-${idx}`}
+              href={navItem.link}
+              className={cn(
+                "relative flex items-center gap-1 px-3 py-2 text-base font-medium text-foreground/70 transition-colors hover:text-foreground"
+              )}
+            >
+              {navItem.icon && <span className="text-base">{navItem.icon}</span>}
+              <span>{navItem.name}</span>
+            </Link>
+          ))}
+        </div>
         <div className="ml-2 border-l border-foreground/10 pl-4">
           <ThemeToggle />
         </div>

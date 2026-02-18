@@ -98,7 +98,17 @@ export default function LoginPage() {
         </Link>
 
         <div>
-          <h1 className="text-4xl font-semibold tracking-tight">Logo placeholder</h1>
+          {/* Light mode: panel is dark → use light logo. Dark mode: panel is light → use dark logo */}
+          <img
+            src="/Peek-A-Box_logo-dark.svg"
+            alt="Peek A Box"
+            className="h-12 w-auto dark:hidden"
+          />
+          <img
+            src="/Peek-A-Box_logo-light.svg"
+            alt="Peek A Box"
+            className="hidden h-12 w-auto dark:block"
+          />
           <p className="mt-4 max-w-md text-lg text-background/70">
             Sign in or create an account to checkout and manage your orders.
           </p>

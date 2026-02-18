@@ -91,7 +91,10 @@ export default function OrderConfirmPage() {
               Thank you, <span className="font-semibold">{userName}</span>!
             </p>
             <p className="mt-1 text-base text-muted-foreground sm:text-lg">
-              Your order has been placed. Here's what you purchased:
+              Your order has been placed.{" "}
+              {reveals.length === 1
+                ? "Here's what was in your box:"
+                : "Here's what was in your boxes:"}
             </p>
           </div>
 
