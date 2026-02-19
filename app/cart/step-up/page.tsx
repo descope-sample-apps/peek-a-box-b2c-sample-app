@@ -7,7 +7,7 @@ import { motion } from "motion/react"
 import { ArrowLeft } from "lucide-react"
 import { Descope } from "@descope/nextjs-sdk"
 import { useSession } from "@descope/nextjs-sdk/client"
-import { FloatingNav } from "@/components/ui/floating-navbar"
+import { AppNav } from "@/components/app-nav"
 
 /**
  * Step-up authentication: re-validate the user before proceeding to order confirmation.
@@ -53,7 +53,7 @@ export default function CartStepUpPage() {
 
   return (
     <div className="min-h-screen bg-background">
-      <FloatingNav navItems={navItems} />
+      <AppNav navItems={navItems} />
 
       <main className="mx-auto max-w-md px-6 pb-24 pt-28">
         <Link

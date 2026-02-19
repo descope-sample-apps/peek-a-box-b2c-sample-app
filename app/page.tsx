@@ -1,28 +1,14 @@
 "use client"
 
-import { useRouter } from "next/navigation"
-import { FloatingNav } from "@/components/ui/floating-navbar"
+import { AppNav } from "@/components/app-nav"
 import { TextGenerateEffect } from "@/components/ui/text-generate-effect"
 import { Button } from "@/components/ui/button"
 import { ProductCard } from "@/components/product-card"
 import { products } from "@/lib/products"
-import { useCart } from "@/components/cart-provider"
 import { GoogleOneTap } from "@/components/google-one-tap"
-import { useDescope, useSession } from "@descope/nextjs-sdk/client"
-import { ShoppingCart, User, LogOut, LogIn } from "lucide-react"
 import Link from "next/link"
 
 export default function StorePage() {
-  const router = useRouter()
-  const { items } = useCart()
-  const sdk = useDescope()
-  const { isAuthenticated } = useSession()
-
-  // Clear session and refresh the page
-  const handleLogout = async () => {
-    await sdk?.logout?.()
-    router.refresh()
-  }
   const bestsellers = products.filter((p) => p.category === "bestsellers")
   const newArrivals = products.filter((p) => p.category === "new")
   const premium = products.filter((p) => p.category === "premium")
@@ -35,52 +21,8 @@ export default function StorePage() {
 
   return (
     <main className="min-h-screen bg-background">
-      {/* Google One Tap sign-in prompt for unauthenticated users */}
       <GoogleOneTap />
-      <FloatingNav navItems={navItems} />
-
-      {/* Top bar */}
-      <div data-slot="top-bar" className="fixed right-6 top-6 z-[5000] flex items-center gap-3 transition-opacity duration-200">
-        {!isAuthenticated && (
-          <Link
-            href="/login"
-            className="flex h-10 items-center gap-2 rounded-full border border-foreground/10 bg-background/80 px-4 py-2 backdrop-blur-md transition-colors hover:bg-muted"
-            aria-label="Login"
-          >
-            <LogIn className="h-4 w-4" />
-            <span className="text-base font-medium">Login</span>
-          </Link>
-        )}
-        {isAuthenticated && (
-          <button
-            type="button"
-            onClick={handleLogout}
-            className="flex h-10 items-center gap-2 rounded-full border border-foreground/10 bg-background/80 px-4 py-2 backdrop-blur-md transition-colors hover:bg-muted"
-            aria-label="Logout"
-          >
-            <LogOut className="h-4 w-4" />
-            <span className="text-base font-medium">Logout</span>
-          </button>
-        )}
-        <Link
-          href="/cart"
-          className="relative flex h-10 w-10 items-center justify-center rounded-full border border-foreground/10 bg-background/80 backdrop-blur-md transition-colors hover:bg-muted"
-        >
-          <ShoppingCart className="h-4 w-4" />
-          {items.length > 0 && (
-            <span className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-foreground text-sm font-medium text-background">
-              {items.reduce((acc, item) => acc + item.quantity, 0)}
-            </span>
-          )}
-        </Link>
-        <Link
-          href="/profile"
-          className="flex h-10 w-10 items-center justify-center rounded-full border border-foreground/10 bg-background/80 backdrop-blur-md transition-colors hover:bg-muted"
-          aria-label="Profile"
-        >
-          <User className="h-4 w-4" />
-        </Link>
-      </div>
+      <AppNav navItems={navItems} />
 
       {/* Hero */}
       <section className="relative flex min-h-[80vh] flex-col items-center justify-end overflow-hidden px-6 pt-28 pb-10 sm:min-h-[75vh] sm:pt-32 md:min-h-[68vh] md:pt-36 lg:min-h-[62vh] lg:pt-40">

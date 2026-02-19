@@ -3,22 +3,16 @@
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { motion, AnimatePresence } from "motion/react"
-import { X, ArrowLeft, LogIn, LogOut, User } from "lucide-react"
-import { useDescope, useSession } from "@descope/nextjs-sdk/client"
+import { X, ArrowLeft } from "lucide-react"
+import { useSession } from "@descope/nextjs-sdk/client"
 import { useCart } from "@/components/cart-provider"
-import { FloatingNav } from "@/components/ui/floating-navbar"
+import { AppNav } from "@/components/app-nav"
 import { Button } from "@/components/ui/button"
 
 export default function CartPage() {
   const router = useRouter()
-  const sdk = useDescope()
   const { items, removeFromCart, totalPrice } = useCart()
   const { isAuthenticated, isSessionLoading } = useSession()
-
-  const handleLogout = async () => {
-    await sdk?.logout?.()
-    router.push("/")
-  }
 
   const handleCheckout = () => {
     if (!isAuthenticated) {
@@ -43,40 +37,7 @@ export default function CartPage() {
 
   return (
     <div className="min-h-screen bg-background">
-      <FloatingNav navItems={navItems} />
-
-      {/* Top bar – login/logout then profile if logged in */}
-      <div data-slot="top-bar" className="fixed right-6 top-6 z-[5000] flex items-center gap-3 transition-opacity duration-200">
-        {!isAuthenticated ? (
-          <Link
-            href="/login"
-            className="flex h-10 items-center gap-2 rounded-full border border-foreground/10 bg-background/80 px-4 py-2 backdrop-blur-md transition-colors hover:bg-muted"
-            aria-label="Login"
-          >
-            <LogIn className="h-4 w-4" />
-            <span className="text-base font-medium">Login</span>
-          </Link>
-        ) : (
-          <button
-            type="button"
-            onClick={handleLogout}
-            className="flex h-10 items-center gap-2 rounded-full border border-foreground/10 bg-background/80 px-4 py-2 backdrop-blur-md transition-colors hover:bg-muted"
-            aria-label="Logout"
-          >
-            <LogOut className="h-4 w-4" />
-            <span className="text-base font-medium">Logout</span>
-          </button>
-        )}
-        {isAuthenticated && (
-          <Link
-            href="/profile"
-            className="flex h-10 w-10 items-center justify-center rounded-full border border-foreground/10 bg-background/80 backdrop-blur-md transition-colors hover:bg-muted"
-            aria-label="Profile"
-          >
-            <User className="h-4 w-4" />
-          </Link>
-        )}
-      </div>
+      <AppNav navItems={navItems} />
 
       <main className="mx-auto max-w-5xl px-6 pb-24 pt-28">
         <Link

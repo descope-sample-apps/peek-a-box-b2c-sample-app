@@ -7,7 +7,7 @@ import { motion } from "motion/react"
 import { ArrowLeft } from "lucide-react"
 import { useUser } from "@descope/nextjs-sdk/client"
 import { useCart } from "@/components/cart-provider"
-import { FloatingNav } from "@/components/ui/floating-navbar"
+import { AppNav } from "@/components/app-nav"
 import { Button } from "@/components/ui/button"
 import { getRevealForBox } from "@/lib/products"
 
@@ -65,7 +65,7 @@ export default function OrderConfirmPage() {
 
   return (
     <div className="min-h-screen bg-background">
-      <FloatingNav navItems={navItems} />
+      <AppNav navItems={navItems} />
 
       <main className="mx-auto max-w-2xl px-6 pb-24 pt-28">
         <Link
