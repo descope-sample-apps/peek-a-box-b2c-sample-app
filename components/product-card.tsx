@@ -55,7 +55,7 @@ export function ProductCard({ product }: ProductCardProps) {
               className="absolute inset-0 hidden h-full w-full object-contain dark:block"
               aria-hidden
             />
-            <span className="absolute bottom-[15%] left-1/2 z-10 -translate-x-1/2 text-xl font-bold tabular-nums text-muted drop-shadow-md sm:text-2xl">
+            <span className="absolute bottom-[15%] left-1/2 z-10 -translate-x-1/2 text-xl font-bold tabular-nums text-muted drop-shadow-md dark:text-foreground sm:text-2xl">
               #{number}
             </span>
           </div>

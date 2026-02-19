@@ -152,7 +152,7 @@ export default function CartPage() {
                             className="absolute inset-0 hidden h-full w-full object-contain dark:block"
                             aria-hidden
                           />
-                          <span className="absolute bottom-[12%] left-1/2 z-10 -translate-x-1/2 text-sm font-bold tabular-nums text-muted drop-shadow-sm">
+                          <span className="absolute bottom-[12%] left-1/2 z-10 -translate-x-1/2 text-sm font-bold tabular-nums text-foreground drop-shadow-sm">
                             #{boxNumber(item.name, item.id)}
                           </span>
                         </div>

@@ -9,7 +9,7 @@ import { products } from "@/lib/products"
 import { useCart } from "@/components/cart-provider"
 import { GoogleOneTap } from "@/components/google-one-tap"
 import { useDescope, useSession } from "@descope/nextjs-sdk/client"
-import { ShoppingCart, User, Package, LogOut, LogIn } from "lucide-react"
+import { ShoppingCart, User, LogOut, LogIn } from "lucide-react"
 import Link from "next/link"
 
 export default function StorePage() {
@@ -87,8 +87,7 @@ export default function StorePage() {
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-muted via-background to-background" />
 
         <div className="relative z-10 mx-auto max-w-4xl text-center mb-16">
-          <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-foreground/10 bg-muted/50 px-4 py-1.5 text-base text-muted-foreground sm:text-lg">
-            <Package className="h-4 w-4" />
+          <div className="mb-6 inline-flex items-center rounded-full border border-foreground/10 bg-muted/50 px-4 py-1.5 text-base text-muted-foreground sm:text-lg">
             Contents revealed after checkout
           </div>
 

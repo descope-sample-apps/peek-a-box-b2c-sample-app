@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { motion } from "motion/react"
-import { ArrowLeft, Package } from "lucide-react"
+import { ArrowLeft } from "lucide-react"
 import { useUser } from "@descope/nextjs-sdk/client"
 import { useCart } from "@/components/cart-provider"
 import { FloatingNav } from "@/components/ui/floating-navbar"
@@ -107,8 +107,19 @@ export default function OrderConfirmPage() {
                 className="rounded-xl border border-foreground/10 bg-card p-6"
               >
                 <div className="flex items-start gap-4">
-                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-muted">
-                    <Package className="h-5 w-5" />
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-muted">
+                    <img
+                      src="/Peek-A-Box_icon-light.svg"
+                      alt=""
+                      className="h-6 w-6 object-contain dark:hidden"
+                      aria-hidden
+                    />
+                    <img
+                      src="/Peek-A-Box_icon-dark.svg"
+                      alt=""
+                      className="hidden h-6 w-6 object-contain dark:block"
+                      aria-hidden
+                    />
                   </div>
                   <div>
                     <p className="text-base text-muted-foreground sm:text-lg">
