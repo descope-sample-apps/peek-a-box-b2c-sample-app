@@ -1,10 +1,9 @@
 "use client"
 
-import Image from "next/image"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { motion, AnimatePresence } from "motion/react"
-import { X, ArrowLeft, Package, LogIn, LogOut, User } from "lucide-react"
+import { X, ArrowLeft, LogIn, LogOut, User } from "lucide-react"
 import { useDescope, useSession } from "@descope/nextjs-sdk/client"
 import { useCart } from "@/components/cart-provider"
 import { FloatingNav } from "@/components/ui/floating-navbar"
@@ -36,6 +35,11 @@ export default function CartPage() {
   const isEmpty = items.length === 0
 
   const navItems = [{ name: "Shop", link: "/" }]
+
+  const boxNumber = (name: string, id: string) => {
+    const match = name.match(/#(\S+)/)
+    return match ? match[1] : id.replace(/^box-/, "")
+  }
 
   return (
     <div className="min-h-screen bg-background">
@@ -96,13 +100,24 @@ export default function CartPage() {
               animate={{ opacity: 1, y: 0 }}
             >
               <div className="flex h-20 w-20 items-center justify-center rounded-full bg-muted">
-                <Package className="h-8 w-8 text-muted-foreground" />
+                <img
+                  src="/Peek-A-Box_icon-light.svg"
+                  alt=""
+                  className="h-12 w-12 object-contain dark:hidden"
+                  aria-hidden
+                />
+                <img
+                  src="/Peek-A-Box_icon-dark.svg"
+                  alt=""
+                  className="hidden h-12 w-12 object-contain dark:block"
+                  aria-hidden
+                />
               </div>
               <p className="mt-6 text-2xl font-semibold text-foreground sm:text-3xl">Your cart is empty.</p>
               <p className="mt-3 text-xl text-muted-foreground sm:text-2xl">
                 Add items from the store to get started.
               </p>
-              <Button asChild size="lg" className="mt-8 rounded-full px-8 text-base sm:text-lg">
+              <Button asChild size="lg" className="mt-8 rounded-full border-2 border-foreground/20 px-8 text-base sm:text-lg">
                 <Link href="/">Continue shopping</Link>
               </Button>
             </motion.div>
@@ -123,16 +138,23 @@ export default function CartPage() {
                       animate={{ opacity: 1, x: 0 }}
                       transition={{ delay: index * 0.1 }}
                     >
-                      <div className="relative h-28 w-28 shrink-0 overflow-hidden rounded-xl bg-muted">
-                        <Image
-                          src={item.image || "/placeholder.svg"}
-                          alt={item.name}
-                          fill
-                          className="object-cover"
-                          sizes="112px"
-                        />
-                        <div className="absolute inset-0 flex items-center justify-center bg-foreground/5">
-                          <Package className="h-8 w-8 text-foreground/30" />
+                      <div className="relative flex h-28 w-28 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-muted">
+                        <div className="relative flex h-[68%] w-[68%] max-h-20 max-w-20 items-center justify-center">
+                          <img
+                            src="/Peek-A-Box_icon-light.svg"
+                            alt=""
+                            className="absolute inset-0 h-full w-full object-contain dark:hidden"
+                            aria-hidden
+                          />
+                          <img
+                            src="/Peek-A-Box_icon-dark.svg"
+                            alt=""
+                            className="absolute inset-0 hidden h-full w-full object-contain dark:block"
+                            aria-hidden
+                          />
+                          <span className="absolute bottom-[12%] left-1/2 z-10 -translate-x-1/2 text-sm font-bold tabular-nums text-muted drop-shadow-sm">
+                            #{boxNumber(item.name, item.id)}
+                          </span>
                         </div>
                       </div>
                       <div className="flex flex-1 flex-col justify-between">

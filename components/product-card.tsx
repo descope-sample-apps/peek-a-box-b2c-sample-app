@@ -1,18 +1,23 @@
 "use client"
 
-import Image from "next/image"
 import { motion } from "motion/react"
 import { useCart } from "@/components/cart-provider"
 import type { Product } from "@/lib/products"
-import { Plus, Package, Minus } from "lucide-react"
+import { Plus, Minus } from "lucide-react"
 
 interface ProductCardProps {
   product: Product
 }
 
+function boxNumber(product: Product): string {
+  const match = product.name.match(/#(\S+)/)
+  return match ? match[1] : product.id.replace(/^box-/, "")
+}
+
 export function ProductCard({ product }: ProductCardProps) {
   const { addToCart, removeFromCart, isInCart } = useCart()
   const inCart = isInCart(product.id)
+  const number = boxNumber(product)
 
   const handleClick = () => {
     if (inCart) {
@@ -36,8 +41,24 @@ export function ProductCard({ product }: ProductCardProps) {
       transition={{ duration: 0.4 }}
     >
       <div className="relative aspect-square overflow-hidden rounded-xl bg-muted">
-        <div className="absolute inset-0 flex items-center justify-center">
-          <Package className="h-16 w-16 text-foreground/10 transition-transform duration-500 group-hover:scale-110 group-hover:rotate-3" />
+        <div className="absolute inset-0 flex items-center justify-center transition-transform duration-500 group-hover:scale-110 group-hover:rotate-3">
+          <div className="relative flex h-[52%] w-[52%] max-h-44 max-w-44 items-center justify-center">
+            <img
+              src="/Peek-A-Box_icon-light.svg"
+              alt=""
+              className="absolute inset-0 h-full w-full object-contain dark:hidden"
+              aria-hidden
+            />
+            <img
+              src="/Peek-A-Box_icon-dark.svg"
+              alt=""
+              className="absolute inset-0 hidden h-full w-full object-contain dark:block"
+              aria-hidden
+            />
+            <span className="absolute bottom-[15%] left-1/2 z-10 -translate-x-1/2 text-xl font-bold tabular-nums text-muted drop-shadow-md sm:text-2xl">
+              #{number}
+            </span>
+          </div>
         </div>
         {product.badge && (
           <span className="absolute left-3 top-3 rounded-full bg-foreground px-3 py-1 text-xs font-medium uppercase tracking-wider text-background">

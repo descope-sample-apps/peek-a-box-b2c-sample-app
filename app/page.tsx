@@ -103,7 +103,7 @@ export default function StorePage() {
             <span className="text-base sm:text-lg">No refunds. No regrets. Probably.</span>
           </p>
           <div className="mt-10 flex flex-wrap items-center justify-center gap-4">
-            <Button asChild size="lg" className="rounded-full px-8 text-base sm:text-lg">
+            <Button asChild size="lg" className="rounded-full border-2 border-foreground/20 px-8 text-base sm:text-lg">
               <Link href="#bestsellers">Shop now</Link>
             </Button>
           </div>

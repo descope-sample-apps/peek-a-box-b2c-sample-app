@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { motion } from "motion/react"
-import { ArrowLeft, Package, Sparkles } from "lucide-react"
+import { ArrowLeft, Package } from "lucide-react"
 import { useUser } from "@descope/nextjs-sdk/client"
 import { useCart } from "@/components/cart-provider"
 import { FloatingNav } from "@/components/ui/floating-navbar"
@@ -86,7 +86,6 @@ export default function OrderConfirmPage() {
           animate={{ opacity: 1 }}
         >
           <div className="mb-8 rounded-2xl bg-muted/50 p-6 text-center">
-            <Sparkles className="mx-auto h-8 w-8 text-foreground" />
             <p className="mt-4 text-lg">
               Thank you, <span className="font-semibold">{userName}</span>!
             </p>
@@ -113,7 +112,7 @@ export default function OrderConfirmPage() {
                   </div>
                   <div>
                     <p className="text-base text-muted-foreground sm:text-lg">
-                      {item.boxId.replace("box-", "Item ")}
+                      {item.boxId.replace("box-", "Box #")}
                     </p>
                     <p className="mt-1 text-lg font-medium">{item.reveal}</p>
                   </div>
@@ -123,7 +122,7 @@ export default function OrderConfirmPage() {
           </div>
 
           <div className="mt-12 text-center">
-            <Button asChild size="lg" className="rounded-full px-8 text-base sm:text-lg">
+            <Button asChild size="lg" className="rounded-full border-2 border-foreground/20 px-8 text-base sm:text-lg">
               <Link href="/">Continue shopping</Link>
             </Button>
           </div>
