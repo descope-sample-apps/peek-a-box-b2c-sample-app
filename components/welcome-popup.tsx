@@ -49,7 +49,7 @@ export function WelcomePopup({ projectId = "" }: { projectId?: string }) {
           <DialogDescription className="text-xl pt-2">
             This is a <strong> sample retail app built by Descope</strong>. It demonstrates
             how to integrate Descope authentication into a retail-style
-            experience—sign in, cart, checkout, and profile.
+            experience.
           </DialogDescription>
         </DialogHeader>
 
@@ -58,10 +58,10 @@ export function WelcomePopup({ projectId = "" }: { projectId?: string }) {
             Suggested ways to explore the site:
           </p>
           <ul className="list-inside list-disc space-y-2 text-xl text-muted-foreground">
-            {/* Placeholder items—replace with your own exploration steps */}
-            <li>[Add your first suggestion here]</li>
-            <li>[Add your second suggestion here]</li>
-            <li>[Add your third suggestion here]</li>
+            <li>Try signing up to experience progressive profiling</li>
+            <li>Try signing in with Google One Tap</li>
+            <li>Try checking out with more than one item in your cart to experience step-up authentication</li>
+            <li>Try managing your own profile information with the User Profile widget</li>
           </ul>
         </div>
 

@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import Link from "next/link"
 import dynamic from "next/dynamic"
+import { useTheme } from "next-themes"
 import { motion } from "motion/react"
 import { useSession } from "@descope/nextjs-sdk/client"
 import { ArrowLeft } from "lucide-react"
@@ -27,8 +28,10 @@ function clearDescopeSession() {
 export default function LoginPage() {
   const router = useRouter()
   const searchParams = useSearchParams()
+  const { resolvedTheme } = useTheme()
   const { isAuthenticated, isSessionLoading } = useSession()
   const [flowId, setFlowId] = useState<string>(DEFAULT_FLOW_ID)
+  const theme = (resolvedTheme === "dark" ? "dark" : "light") as "light" | "dark"
 
   const returnTo = searchParams.get("returnTo") || "/"
 
@@ -140,7 +143,7 @@ export default function LoginPage() {
             <Descope
               flowId={flowId}
               onSuccess={handleSuccess}
-              theme="light"
+              theme={theme}
             />
           </div>
         </motion.div>

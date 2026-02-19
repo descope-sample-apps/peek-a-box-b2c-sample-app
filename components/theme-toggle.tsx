@@ -27,7 +27,7 @@ export function ThemeToggle() {
       whileTap={{ scale: 0.95 }}
       onClick={() => {
         const newTheme = resolvedTheme === "dark" ? "light" : "dark"
-        console.log("[v0] Setting theme to:", newTheme)
+        console.log("Setting theme to:", newTheme)
         setTheme(newTheme)
       }}
       className="relative flex h-9 w-9 items-center justify-center rounded-full border border-foreground/10 bg-background/50 text-foreground/70 transition-colors hover:bg-foreground/5 hover:text-foreground"

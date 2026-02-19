@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation"
 import Link from "next/link"
+import { useTheme } from "next-themes"
 import { motion } from "motion/react"
 import { UserProfile } from "@descope/nextjs-sdk"
 import { useDescope } from "@descope/nextjs-sdk/client"
@@ -12,6 +13,8 @@ import { AppNav } from "@/components/app-nav"
 export default function ProfilePage() {
   const router = useRouter()
   const sdk = useDescope()
+  const { resolvedTheme } = useTheme()
+  const theme = (resolvedTheme === "dark" ? "dark" : "light") as "light" | "dark"
 
   const handleLogout = async () => {
     await sdk?.logout?.()
@@ -46,6 +49,7 @@ export default function ProfilePage() {
           {/* The User Profile widget enables users to manage their personal information, profile pictures, and authentication methods*/}
           <UserProfile
             widgetId="user-profile-widget"
+            theme={theme}
             onLogout={handleLogout}
           />
         </motion.div>

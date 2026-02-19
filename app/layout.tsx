@@ -1,7 +1,6 @@
 import React from "react"
 import type { Metadata } from "next"
 import { cookies } from "next/headers"
-import { Analytics } from "@vercel/analytics/next"
 import { GeistSans } from "geist/font/sans"
 import { GeistMono } from "geist/font/mono"
 import { CartProvider } from "@/components/cart-provider"
@@ -63,7 +62,6 @@ export default async function RootLayout({
             </CartProvider>
           </DescopeAuthProvider>
         </ThemeProvider>
-        <Analytics />
       </body>
     </html>
   )

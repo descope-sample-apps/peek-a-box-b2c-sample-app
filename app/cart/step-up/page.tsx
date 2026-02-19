@@ -3,6 +3,7 @@
 import { useCallback, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
+import { useTheme } from "next-themes"
 import { motion } from "motion/react"
 import { ArrowLeft } from "lucide-react"
 import { Descope } from "@descope/nextjs-sdk"
@@ -15,7 +16,9 @@ import { AppNav } from "@/components/app-nav"
  */
 export default function CartStepUpPage() {
   const router = useRouter()
+  const { resolvedTheme } = useTheme()
   const { isAuthenticated, isSessionLoading } = useSession()
+  const theme = (resolvedTheme === "dark" ? "dark" : "light") as "light" | "dark"
 
   const handleSuccess = useCallback(() => {
     router.push("/cart/confirm")
@@ -80,7 +83,7 @@ export default function CartStepUpPage() {
           <Descope
             flowId="step-up"
             onSuccess={handleSuccess}
-            theme="light"
+            theme={theme}
           />
         </motion.div>
       </main>
