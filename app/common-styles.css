@@ -1,0 +1,149 @@
+/**
+ * Shared layout and component styles used across pages.
+ * Use these classes instead of duplicating long Tailwind strings.
+ */
+
+@layer components {
+  /* Page shell */
+  .page-shell {
+    @apply min-h-screen bg-background;
+  }
+
+  /* Main content area (below nav) */
+  .main-content {
+    @apply mx-auto px-6 pb-24 pt-28;
+  }
+  .main-content--narrow {
+    @apply mx-auto max-w-md px-6 pb-24 pt-28;
+  }
+  .main-content--medium {
+    @apply mx-auto max-w-2xl px-6 pb-24 pt-28;
+  }
+  .main-content--wide {
+    @apply mx-auto max-w-5xl px-6 pb-24 pt-28;
+  }
+
+  /* Back link (muted, with hover) */
+  .back-link {
+    @apply inline-flex items-center gap-2 text-base text-muted-foreground transition-colors hover:text-foreground;
+  }
+  .back-link--on-dark {
+    @apply inline-flex items-center gap-2 text-base text-background/70 transition-colors hover:text-background;
+  }
+
+  /* Page title */
+  .page-title {
+    @apply mt-8 text-3xl font-semibold tracking-tight;
+  }
+  .page-title--sm {
+    @apply mt-8 text-2xl font-semibold tracking-tight;
+  }
+  .page-title--lg {
+    @apply mt-8 text-4xl font-semibold tracking-tight sm:text-5xl;
+  }
+
+  /* Section (product sections, etc.) */
+  .section-container {
+    @apply mx-auto max-w-6xl;
+  }
+  .section-header {
+    @apply mb-12;
+  }
+  .section-title {
+    @apply text-3xl font-semibold tracking-tight;
+  }
+  .section-description {
+    @apply mt-2 text-base text-muted-foreground sm:text-lg;
+  }
+  .product-grid {
+    @apply grid gap-6 sm:grid-cols-2 lg:grid-cols-3;
+  }
+
+  /* Hero pill / badge */
+  .hero-pill {
+    @apply inline-flex items-center rounded-full border border-foreground/10 bg-muted/50 px-4 py-1.5 text-base text-muted-foreground sm:text-lg;
+  }
+
+  /* Primary outline button (for Button component) */
+  .btn-primary-outline {
+    @apply rounded-full border-2 border-foreground/20 px-8 text-base sm:text-lg;
+  }
+
+  /* Full-screen loading / redirect state */
+  .screen-center {
+    @apply flex min-h-screen items-center justify-center bg-background;
+  }
+  .screen-center__text {
+    @apply text-base text-muted-foreground;
+  }
+  .spinner {
+    @apply h-6 w-6 rounded-full border-2 border-foreground border-t-transparent;
+  }
+
+  /* Cards / panels */
+  .card-muted {
+    @apply rounded-2xl bg-muted/50 p-6;
+  }
+  .card-bordered {
+    @apply rounded-xl border border-foreground/10 bg-card p-6;
+  }
+
+  /* Checkout CTA button */
+  .checkout-button {
+    @apply mt-6 w-full rounded-full bg-foreground py-3.5 text-base font-medium text-background transition-colors hover:bg-foreground/90 disabled:opacity-50 sm:text-lg;
+  }
+
+  /* Body text (muted, responsive) */
+  .text-body-muted {
+    @apply text-base text-muted-foreground sm:text-lg;
+  }
+  .text-body-muted--center {
+    @apply text-center text-base text-muted-foreground sm:text-lg;
+  }
+
+  /* Nav (top bar) */
+  .nav-button {
+    @apply flex h-10 items-center justify-center gap-2 rounded-full border border-foreground/10 bg-background/80 backdrop-blur-md transition-colors hover:bg-muted;
+  }
+  .nav-button--icon-only {
+    @apply flex h-10 w-10 items-center justify-center rounded-full border border-foreground/10 bg-background/80 backdrop-blur-md transition-colors hover:bg-muted;
+  }
+  .nav-link {
+    @apply flex items-center gap-3 rounded-lg px-3 py-3 text-base font-medium text-foreground/80 transition-colors hover:bg-muted hover:text-foreground;
+  }
+
+  /* Footer */
+  .footer-bar {
+    @apply border-t border-foreground/10 px-6 py-12;
+  }
+  .footer-text {
+    @apply text-base text-muted-foreground sm:text-lg;
+  }
+
+  /* Cart / list UI */
+  .empty-state-icon-wrap {
+    @apply flex h-20 w-20 items-center justify-center rounded-full bg-muted;
+  }
+  .remove-item-button {
+    @apply flex h-8 w-8 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-muted hover:text-foreground;
+  }
+
+  /* Order summary */
+  .order-summary-row {
+    @apply flex justify-between;
+  }
+  .order-summary-label {
+    @apply text-muted-foreground;
+  }
+  .order-summary-total {
+    @apply flex justify-between border-t border-border pt-4 text-base font-medium;
+  }
+
+  /* Logo/icon theme-aware images: use .logo-light and .logo-dark on two img siblings */
+  .logo-light {
+    @apply dark:hidden;
+  }
+  .logo-dark {
+    @apply hidden dark:block;
+  }
+}

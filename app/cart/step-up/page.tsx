@@ -59,17 +59,12 @@ export default function CartStepUpPage() {
       <AppNav navItems={navItems} />
 
       <main className="mx-auto max-w-md px-6 pb-24 pt-28">
-        <Link
-          href="/cart"
-          className="inline-flex items-center gap-2 text-base text-muted-foreground transition-colors hover:text-foreground"
-        >
-          <ArrowLeft className="h-4 w-4" />
+        <Link href="/cart" className="inline-flex items-center gap-2 text-base text-muted-foreground transition-colors hover:text-foreground">
+          <ArrowLeft className="h-4 w-4 shrink-0" />
           Back to cart
         </Link>
 
-        <h1 className="mt-8 text-2xl font-semibold tracking-tight">
-          Verify your identity
-        </h1>
+        <h1 className="mt-8 text-2xl font-semibold tracking-tight">Verify your identity</h1>
         <p className="mt-2 text-base text-muted-foreground sm:text-lg">
           For your security, please sign in again before completing your order.
         </p>

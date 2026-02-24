@@ -92,11 +92,8 @@ export default function LoginPage() {
   return (
     <div className="flex min-h-screen flex-col bg-background lg:flex-row">
       <div className="relative hidden flex-1 flex-col justify-between bg-foreground p-12 text-background lg:flex">
-        <Link
-          href="/"
-          className="inline-flex items-center gap-2 text-base text-background/70 transition-colors hover:text-background"
-        >
-          <ArrowLeft className="h-4 w-4" />
+        <Link href="/" className="inline-flex items-center gap-2 text-base text-background/70 transition-colors hover:text-background">
+          <ArrowLeft className="h-4 w-4 shrink-0" />
           Back to store
         </Link>
 
@@ -128,7 +125,7 @@ export default function LoginPage() {
             href="/"
             className="inline-flex items-center gap-2 text-base text-muted-foreground transition-colors hover:text-foreground"
           >
-            <ArrowLeft className="h-4 w-4" />
+            <ArrowLeft className="h-4 w-4 shrink-0" />
             Back to store
           </Link>
         </div>

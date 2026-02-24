@@ -40,17 +40,12 @@ export default function CartPage() {
       <AppNav navItems={navItems} />
 
       <main className="mx-auto max-w-5xl px-6 pb-24 pt-28">
-        <Link
-          href="/"
-          className="inline-flex items-center gap-2 text-base text-muted-foreground transition-colors hover:text-foreground"
-        >
-          <ArrowLeft className="h-4 w-4" />
+        <Link href="/" className="inline-flex items-center gap-2 text-base text-muted-foreground transition-colors hover:text-foreground">
+          <ArrowLeft className="h-4 w-4 shrink-0" />
           Back to store
         </Link>
 
-        <h1 className="mt-8 text-4xl font-semibold tracking-tight sm:text-5xl">
-          Your cart
-        </h1>
+        <h1 className="mt-8 text-4xl font-semibold tracking-tight sm:text-5xl">Your cart</h1>
 
         <AnimatePresence mode="wait">
           {isEmpty ? (

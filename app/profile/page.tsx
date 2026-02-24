@@ -28,17 +28,12 @@ export default function ProfilePage() {
       <AppNav navItems={navItems} />
 
       <main className="mx-auto max-w-2xl px-6 pb-24 pt-28">
-        <Link
-          href="/"
-          className="inline-flex items-center gap-2 text-base text-muted-foreground transition-colors hover:text-foreground"
-        >
-          <ArrowLeft className="h-4 w-4" />
+        <Link href="/" className="inline-flex items-center gap-2 text-base text-muted-foreground transition-colors hover:text-foreground">
+          <ArrowLeft className="h-4 w-4 shrink-0" />
           Back to store
         </Link>
 
-        <h1 className="mt-8 text-3xl font-semibold tracking-tight">
-          Your Profile
-        </h1>
+        <h1 className="mt-8 text-3xl font-semibold tracking-tight">Your Profile</h1>
 
         <motion.div
           className="mt-12"

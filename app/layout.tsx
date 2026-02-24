@@ -3,8 +3,8 @@ import type { Metadata } from "next"
 import { cookies } from "next/headers"
 import { GeistSans } from "geist/font/sans"
 import { GeistMono } from "geist/font/mono"
+import { AuthProvider } from "@descope/nextjs-sdk"
 import { CartProvider } from "@/components/cart-provider"
-import { DescopeAuthProvider } from "@/components/descope-auth-provider"
 import { ThemeProvider } from "@/components/theme-provider"
 import { WelcomePopup } from "@/components/welcome-popup"
 import { DESCOPE_PROJECT_COOKIE_NAME } from "@/lib/descope-server"
@@ -55,12 +55,13 @@ export default async function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <DescopeAuthProvider projectId={projectId}>
+          {/* The Descope AuthProvider is a wrapper that provides the auth context to the app */}
+          <AuthProvider projectId={projectId}>
             <CartProvider>
               <WelcomePopup projectId={projectId} />
               {children}
             </CartProvider>
-          </DescopeAuthProvider>
+          </AuthProvider>
         </ThemeProvider>
       </body>
     </html>

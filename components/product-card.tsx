@@ -46,13 +46,13 @@ export function ProductCard({ product }: ProductCardProps) {
             <img
               src="/Peek-A-Box_icon-light.svg"
               alt=""
-              className="absolute inset-0 h-full w-full object-contain dark:hidden"
+              className="absolute inset-0 h-full w-full object-contain logo-light"
               aria-hidden
             />
             <img
               src="/Peek-A-Box_icon-dark.svg"
               alt=""
-              className="absolute inset-0 hidden h-full w-full object-contain dark:block"
+              className="logo-dark absolute inset-0 h-full w-full object-contain"
               aria-hidden
             />
             <span className="absolute bottom-[15%] left-1/2 z-10 -translate-x-1/2 text-xl font-bold tabular-nums text-muted drop-shadow-md dark:text-foreground sm:text-2xl">

@@ -106,9 +106,7 @@ export function AppNav({ navItems }: { navItems: NavItem[] }) {
                   key={item.link}
                   href={item.link}
                   onClick={closeSheet}
-                  className={cn(
-                    "flex items-center gap-3 rounded-lg px-3 py-3 text-base font-medium text-foreground/80 transition-colors hover:bg-muted hover:text-foreground"
-                  )}
+                  className="flex items-center gap-3 rounded-lg px-3 py-3 text-base font-medium text-foreground/80 transition-colors hover:bg-muted hover:text-foreground"
                 >
                   {item.icon}
                   {item.name}
@@ -177,7 +175,7 @@ export function AppNav({ navItems }: { navItems: NavItem[] }) {
         {!isAuthenticated && (
           <Link
             href="/login"
-            className="flex h-10 items-center gap-2 rounded-full border border-foreground/10 bg-background/80 px-4 py-2 backdrop-blur-md transition-colors hover:bg-muted"
+            className="flex h-10 items-center justify-center gap-2 rounded-full border border-foreground/10 bg-background/80 px-4 py-2 backdrop-blur-md transition-colors hover:bg-muted"
             aria-label="Login"
           >
             <LogIn className="h-4 w-4" />
@@ -188,7 +186,7 @@ export function AppNav({ navItems }: { navItems: NavItem[] }) {
           <button
             type="button"
             onClick={handleLogout}
-            className="flex h-10 items-center gap-2 rounded-full border border-foreground/10 bg-background/80 px-4 py-2 backdrop-blur-md transition-colors hover:bg-muted"
+            className="flex h-10 items-center justify-center gap-2 rounded-full border border-foreground/10 bg-background/80 px-4 py-2 backdrop-blur-md transition-colors hover:bg-muted"
             aria-label="Logout"
           >
             <LogOut className="h-4 w-4" />
