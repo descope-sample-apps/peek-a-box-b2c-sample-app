@@ -30,24 +30,8 @@ export default function CartStepUpPage() {
     }
   }, [isAuthenticated, isSessionLoading, router])
 
-  if (isSessionLoading) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-background">
-        <motion.div
-          className="h-6 w-6 rounded-full border-2 border-foreground border-t-transparent"
-          animate={{ rotate: 360 }}
-          transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-        />
-      </div>
-    )
-  }
-
-  if (!isAuthenticated) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-background">
-        <p className="text-base text-muted-foreground">Redirecting to sign in...</p>
-      </div>
-    )
+  if (isSessionLoading || !isAuthenticated) {
+    return <div className="min-h-screen bg-background" />
   }
 
   const navItems = [

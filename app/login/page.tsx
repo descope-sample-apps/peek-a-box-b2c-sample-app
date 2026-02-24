@@ -1,64 +1,26 @@
 "use client"
 
-import { useCallback, useEffect, useState } from "react"
+import { useCallback, useEffect } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import Link from "next/link"
-import dynamic from "next/dynamic"
 import { useTheme } from "next-themes"
 import { motion } from "motion/react"
+import { Descope } from "@descope/nextjs-sdk"
 import { useSession } from "@descope/nextjs-sdk/client"
 import { ArrowLeft } from "lucide-react"
-
-const Descope = dynamic(
-  () => import("@descope/nextjs-sdk").then((mod) => mod.Descope),
-  { ssr: false }
-)
-
-const FLOW_ID_STORAGE_KEY = "flowId"
-const PROJECT_ID_STORAGE_KEY = "projectId"
-const DEFAULT_FLOW_ID = "sign-up-or-in"
-
-// Descope session cookie names; clear when project or flow changes
-function clearDescopeSession() {
-  if (typeof document === "undefined") return
-  document.cookie = "DS=; path=/; max-age=0"
-  document.cookie = "DSR=; path=/; max-age=0"
-}
+import { useDescopeFlowAndProjectIds } from "@/lib/descope-client"
 
 export default function LoginPage() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const { resolvedTheme } = useTheme()
   const { isAuthenticated, isSessionLoading } = useSession()
-  const [flowId, setFlowId] = useState<string>(DEFAULT_FLOW_ID)
+  const { flowId } = useDescopeFlowAndProjectIds()
   const theme = (resolvedTheme === "dark" ? "dark" : "light") as "light" | "dark"
 
   const returnTo = searchParams.get("returnTo") || "/"
 
-  // Flow ID and project ID from query param or localStorage (like React sample). Clear session when they change.
-  useEffect(() => {
-    if (typeof window === "undefined") return
-
-    const queryProjectId = searchParams.get("project")
-    const queryFlowId = searchParams.get("flow")
-    const storedProjectId = localStorage.getItem(PROJECT_ID_STORAGE_KEY)
-    const storedFlowId = localStorage.getItem(FLOW_ID_STORAGE_KEY)
-
-    const projectId = queryProjectId || storedProjectId || ""
-    const flowIdResolved = queryFlowId || storedFlowId || DEFAULT_FLOW_ID
-
-    if (projectId && projectId !== storedProjectId) {
-      clearDescopeSession()
-      localStorage.setItem(PROJECT_ID_STORAGE_KEY, projectId)
-    }
-    if (flowIdResolved !== storedFlowId) {
-      clearDescopeSession()
-      localStorage.setItem(FLOW_ID_STORAGE_KEY, flowIdResolved)
-    }
-
-    setFlowId(flowIdResolved)
-  }, [searchParams])
-
+  // Redirect to the returnTo URL if the user is authenticated
   useEffect(() => {
     if (isAuthenticated && !isSessionLoading) {
       router.push(returnTo)
@@ -69,24 +31,8 @@ export default function LoginPage() {
     router.push(returnTo)
   }, [router, returnTo])
 
-  if (isSessionLoading) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-background">
-        <motion.div
-          className="h-6 w-6 rounded-full border-2 border-foreground border-t-transparent"
-          animate={{ rotate: 360 }}
-          transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-        />
-      </div>
-    )
-  }
-
-  if (isAuthenticated) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-background">
-        <p className="text-base text-muted-foreground">Redirecting...</p>
-      </div>
-    )
+  if (isSessionLoading || isAuthenticated) {
+    return <div className="min-h-screen bg-background" />
   }
 
   return (
@@ -98,7 +44,6 @@ export default function LoginPage() {
         </Link>
 
         <div>
-          {/* Light mode: panel is dark → use light logo. Dark mode: panel is light → use dark logo */}
           <img
             src="/Peek-A-Box_logo-dark.svg"
             alt="Peek A Box"
@@ -136,6 +81,7 @@ export default function LoginPage() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4 }}
         >
+          {/* The Descope flow component used to authenticate the user. */}
           <div className="w-full max-w-sm">
             <Descope
               flowId={flowId}

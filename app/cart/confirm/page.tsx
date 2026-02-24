@@ -42,19 +42,11 @@ export default function OrderConfirmPage() {
   }, [items, router, clearCart])
 
   if (items.length === 0 && snapshot === null) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-background">
-        <p className="text-base text-muted-foreground">Redirecting...</p>
-      </div>
-    )
+    return <div className="min-h-screen bg-background" />
   }
 
   if (snapshot === null) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-background">
-        <p className="text-base text-muted-foreground">Loading...</p>
-      </div>
-    )
+    return <div className="min-h-screen bg-background" />
   }
 
   const reveals = snapshot

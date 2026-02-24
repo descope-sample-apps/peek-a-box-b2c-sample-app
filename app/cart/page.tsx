@@ -164,7 +164,7 @@ export default function CartPage() {
                     className="mt-6 w-full rounded-full bg-foreground py-3.5 text-base font-medium text-background transition-colors hover:bg-foreground/90 disabled:opacity-50 sm:text-lg"
                   >
                     {isSessionLoading
-                      ? "Loading..."
+                      ? "Checking out..."
                       : isAuthenticated
                         ? "Place order"
                         : "Sign in to checkout"}

@@ -7,8 +7,8 @@ import { AuthProvider } from "@descope/nextjs-sdk"
 import { CartProvider } from "@/components/cart-provider"
 import { ThemeProvider } from "@/components/theme-provider"
 import { WelcomePopup } from "@/components/welcome-popup"
-import { DESCOPE_PROJECT_COOKIE_NAME } from "@/lib/descope-server"
-import "./globals.css"
+import { getProjectIdFromCookies } from "@/lib/descope-server"
+import "./styles/globals.css"
 
 
 export const metadata: Metadata = {
@@ -41,10 +41,7 @@ export default async function RootLayout({
   children: React.ReactNode
 }>) {
   const cookieStore = await cookies()
-  const projectId =
-    cookieStore.get(DESCOPE_PROJECT_COOKIE_NAME)?.value ||
-    process.env.NEXT_PUBLIC_DESCOPE_PROJECT_ID ||
-    ""
+  const projectId = getProjectIdFromCookies(cookieStore)
 
   return (
     <html lang="en" className={`${GeistSans.variable} ${GeistMono.variable}`} suppressHydrationWarning>

@@ -16,6 +16,7 @@ export default function ProfilePage() {
   const { resolvedTheme } = useTheme()
   const theme = (resolvedTheme === "dark" ? "dark" : "light") as "light" | "dark"
 
+  // use the Descope SDK to logout the user
   const handleLogout = async () => {
     await sdk?.logout?.()
     router.push("/")

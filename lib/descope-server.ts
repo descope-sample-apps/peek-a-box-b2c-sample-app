@@ -18,6 +18,19 @@ export function getProjectIdFromRequest(request: NextRequest): string {
   )
 }
 
+/**
+ * Get project ID from cookies.
+ */
+export function getProjectIdFromCookies(
+  cookieStore: { get(name: string): { value: string } | undefined }
+): string {
+  return (
+    cookieStore.get(DESCOPE_PROJECT_COOKIE_NAME)?.value ||
+    process.env.NEXT_PUBLIC_DESCOPE_PROJECT_ID ||
+    ""
+  )
+}
+
 export function getDescopeServer(projectId?: string) {
   const effectiveProjectId =
     projectId || process.env.NEXT_PUBLIC_DESCOPE_PROJECT_ID || ""

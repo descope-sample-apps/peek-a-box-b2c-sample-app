@@ -1,6 +1,5 @@
 @import 'tailwindcss';
 @import 'tw-animate-css';
-@import './common-styles.css';
 
 @custom-variant dark (&:is(.dark *));
 
@@ -122,6 +121,121 @@
   }
   body {
     @apply bg-background text-foreground;
+  }
+}
+
+/* Shared layout and component utilities */
+@layer components {
+  .page-shell {
+    @apply min-h-screen bg-background;
+  }
+  .main-content {
+    @apply mx-auto px-6 pb-24 pt-28;
+  }
+  .main-content--narrow {
+    @apply mx-auto max-w-md px-6 pb-24 pt-28;
+  }
+  .main-content--medium {
+    @apply mx-auto max-w-2xl px-6 pb-24 pt-28;
+  }
+  .main-content--wide {
+    @apply mx-auto max-w-5xl px-6 pb-24 pt-28;
+  }
+  .back-link {
+    @apply inline-flex items-center gap-2 text-base text-muted-foreground transition-colors hover:text-foreground;
+  }
+  .back-link--on-dark {
+    @apply inline-flex items-center gap-2 text-base text-background/70 transition-colors hover:text-background;
+  }
+  .page-title {
+    @apply mt-8 text-3xl font-semibold tracking-tight;
+  }
+  .page-title--sm {
+    @apply mt-8 text-2xl font-semibold tracking-tight;
+  }
+  .page-title--lg {
+    @apply mt-8 text-4xl font-semibold tracking-tight sm:text-5xl;
+  }
+  .section-container {
+    @apply mx-auto max-w-6xl;
+  }
+  .section-header {
+    @apply mb-12;
+  }
+  .section-title {
+    @apply text-3xl font-semibold tracking-tight;
+  }
+  .section-description {
+    @apply mt-2 text-base text-muted-foreground sm:text-lg;
+  }
+  .product-grid {
+    @apply grid gap-6 sm:grid-cols-2 lg:grid-cols-3;
+  }
+  .hero-pill {
+    @apply inline-flex items-center rounded-full border border-foreground/10 bg-muted/50 px-4 py-1.5 text-base text-muted-foreground sm:text-lg;
+  }
+  .btn-primary-outline {
+    @apply rounded-full border-2 border-foreground/20 px-8 text-base sm:text-lg;
+  }
+  .screen-center {
+    @apply flex min-h-screen items-center justify-center bg-background;
+  }
+  .screen-center__text {
+    @apply text-base text-muted-foreground;
+  }
+  .spinner {
+    @apply h-6 w-6 rounded-full border-2 border-foreground border-t-transparent;
+  }
+  .card-muted {
+    @apply rounded-2xl bg-muted/50 p-6;
+  }
+  .card-bordered {
+    @apply rounded-xl border border-foreground/10 bg-card p-6;
+  }
+  .checkout-button {
+    @apply mt-6 w-full rounded-full bg-foreground py-3.5 text-base font-medium text-background transition-colors hover:bg-foreground/90 disabled:opacity-50 sm:text-lg;
+  }
+  .text-body-muted {
+    @apply text-base text-muted-foreground sm:text-lg;
+  }
+  .text-body-muted--center {
+    @apply text-center text-base text-muted-foreground sm:text-lg;
+  }
+  .nav-button {
+    @apply flex h-10 items-center justify-center gap-2 rounded-full border border-foreground/10 bg-background/80 backdrop-blur-md transition-colors hover:bg-muted;
+  }
+  .nav-button--icon-only {
+    @apply flex h-10 w-10 items-center justify-center rounded-full border border-foreground/10 bg-background/80 backdrop-blur-md transition-colors hover:bg-muted;
+  }
+  .nav-link {
+    @apply flex items-center gap-3 rounded-lg px-3 py-3 text-base font-medium text-foreground/80 transition-colors hover:bg-muted hover:text-foreground;
+  }
+  .footer-bar {
+    @apply border-t border-foreground/10 px-6 py-12;
+  }
+  .footer-text {
+    @apply text-base text-muted-foreground sm:text-lg;
+  }
+  .empty-state-icon-wrap {
+    @apply flex h-20 w-20 items-center justify-center rounded-full bg-muted;
+  }
+  .remove-item-button {
+    @apply flex h-8 w-8 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-muted hover:text-foreground;
+  }
+  .order-summary-row {
+    @apply flex justify-between;
+  }
+  .order-summary-label {
+    @apply text-muted-foreground;
+  }
+  .order-summary-total {
+    @apply flex justify-between border-t border-border pt-4 text-base font-medium;
+  }
+  .logo-light {
+    @apply dark:hidden;
+  }
+  .logo-dark {
+    @apply hidden dark:block;
   }
 }
 
