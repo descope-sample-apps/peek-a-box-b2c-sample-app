@@ -1,0 +1,36 @@
+name: E2E Tests
+
+on: [push]
+
+jobs:
+  cypress-run:
+    name: Cypress E2E Tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Cypress binary
+        run: npm run cy:install
+
+      - name: Build
+        run: npm run build
+
+      - name: Cypress run
+        uses: cypress-io/github-action@v6
+        env:
+          NEXT_PUBLIC_DESCOPE_PROJECT_ID: ${{ secrets.NEXT_PUBLIC_DESCOPE_PROJECT_ID }}
+        with:
+          start: npm run start
+          wait-on: "http://localhost:3000"
+          wait-on-timeout: 120
+          browser: chrome
