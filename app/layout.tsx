@@ -41,8 +41,7 @@ export default async function RootLayout({
   children: React.ReactNode
 }>) {
   const cookieStore = await cookies()
-  const resolvedProjectId = getProjectIdFromCookies(cookieStore)
-  const projectId = resolvedProjectId || "P38wcxH1PyMCpu7uOfALgSHn4zKv"
+  const projectId = getProjectIdFromCookies(cookieStore)
 
   return (
     <html lang="en" className={`${GeistSans.variable} ${GeistMono.variable}`} suppressHydrationWarning>
