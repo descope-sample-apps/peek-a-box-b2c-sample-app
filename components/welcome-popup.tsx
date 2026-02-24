@@ -14,10 +14,18 @@ const STORAGE_KEY = "descope-b2c-welcome-dismissed"
 
 export function WelcomePopup({ projectId = "" }: { projectId?: string }) {
   const [open, setOpen] = useState(false)
+  const [exampleUrl, setExampleUrl] = useState("")
 
   useEffect(() => {
     const dismissed = localStorage.getItem(STORAGE_KEY) === "true"
     setOpen(!dismissed)
+  }, [])
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const base = window.location.origin + window.location.pathname
+      setExampleUrl(`${base}?project=YOUR_PROJECT_ID&flow=YOUR_FLOW_ID`)
+    }
   }, [])
 
   useEffect(() => {
@@ -42,22 +50,22 @@ export function WelcomePopup({ projectId = "" }: { projectId?: string }) {
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent className="sm:max-w-5xl p-8 text-xl rounded-3xl border border-foreground/10 bg-background/80 backdrop-blur-md shadow-lg">
-        <DialogHeader className="space-y-4">
+        <DialogHeader className="space-y-2">
           <DialogTitle className="text-center text-3xl sm:text-4xl">
             Welcome to peek-a-box!
           </DialogTitle>
-          <DialogDescription className="text-xl pt-2">
-            This is a <strong> sample retail app built by Descope</strong>. It demonstrates
-            how to integrate Descope authentication into a retail-style
+          <DialogDescription className="text-lg">
+            This is a <strong> sample retail app built by Descope</strong>. It shows
+            how to integrate Descope auth into a B2C-style
             experience.
           </DialogDescription>
         </DialogHeader>
 
-        <div className="rounded-2xl border border-foreground/10 bg-muted/40 backdrop-blur-sm p-6 shadow-inner">
-          <p className="mb-3 text-xl font-medium text-foreground">
-            Suggested ways to explore the site:
+        <div className="rounded-2xl border border-foreground/10 bg-muted/40 backdrop-blur-sm p-4 shadow-inner">
+          <p className="mb-2 text-lg font-medium text-foreground">
+            Suggested ways to explore the site
           </p>
-          <ul className="list-inside list-disc space-y-2 text-xl text-muted-foreground">
+          <ul className="list-inside list-disc space-y-2 text-base text-muted-foreground">
             <li>Try signing up to experience progressive profiling</li>
             <li>Try signing in with Google One Tap</li>
             <li>Try checking out with more than one item in your cart to experience step-up authentication</li>
@@ -65,12 +73,26 @@ export function WelcomePopup({ projectId = "" }: { projectId?: string }) {
           </ul>
         </div>
 
-        <p className="text-xl text-muted-foreground">
+        <p className="text-base text-muted-foreground">
           Currently using Descope Flows from Project ID:{" "}
-          <span className="inline-block rounded-full border border-foreground/10 bg-muted/40 backdrop-blur-sm px-3 py-1.5 font-mono font-medium text-foreground shadow-sm">
+          <span className="inline-block rounded-full border border-foreground/10 bg-muted/40 backdrop-blur-sm px-2.5 py-1 font-mono text-sm font-medium text-foreground shadow-sm">
             {projectId || "—"}
           </span>
         </p>
+
+        <div className="rounded-2xl border border-foreground/10 bg-muted/40 backdrop-blur-sm p-4 shadow-inner">
+          <p className="mb-2 text-lg font-medium text-foreground">
+            Use your own project and flow
+          </p>
+          <p className="mb-2 text-base text-muted-foreground">
+            Use query parameters to point to your own project and flow:
+          </p>
+          {exampleUrl && (
+            <p className="break-all rounded-lg bg-background/80 px-3 py-2 font-mono text-base text-foreground">
+              {exampleUrl}
+            </p>
+          )}
+        </div>
       </DialogContent>
     </Dialog>
   )
