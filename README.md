@@ -45,6 +45,18 @@ Use this to try the app with your own Descope project and flows without forking 
 
    Open [http://localhost:3000](http://localhost:3000).
 
+## E2E tests (Cypress)
+
+1. **First time:** install the Cypress binary (after `npm install`):
+   ```bash
+   npm run cy:install
+   ```
+2. With the app running locally (`npm run dev`), in another terminal:
+   - **Interactive:** `npm run cy:open` — opens Cypress UI to run or debug specs.
+   - **Headless:** `npm run cy:run` — runs all e2e specs once.
+
+Specs live in `cypress/e2e/` and cover home, cart, login, and navigation. Tests do not perform real sign-in; they assert page load and UI flows.
+
 ## License
 
 MIT. See [LICENSE](LICENSE).
