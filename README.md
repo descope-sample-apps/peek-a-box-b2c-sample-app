@@ -11,7 +11,7 @@ When using a **hosted** version of this app (https://www.peek-a-box.shop/), you 
 | `project` | `?project=YOUR_PROJECT_ID` | Descope project ID. Once set, it is stored in a cookie so later requests use the same project. |
 | `flow`    | `?flow=sign-up-or-in`      | Flow ID for the login page (e.g. `sign-up-or-in`). Stored in `localStorage` so the app uses it until you change it. |
 
-Example: `https://hosted-demo.example.com/login?project=YOUR_PROJECT_ID&flow=sign-up-or-in`
+Example: `https://www.peek-a-box.shop/login?project=YOUR_PROJECT_ID&flow=sign-up-or-in`
 
 Use this to try the app with your own Descope project and flows without forking or configuring the repo.
 
