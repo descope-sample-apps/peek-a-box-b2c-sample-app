@@ -7,6 +7,7 @@ import { ProductCard } from "@/components/product-card"
 import { products } from "@/lib/products"
 import { GoogleOneTap } from "@/components/google-one-tap"
 import Link from "next/link"
+import { ExternalLink } from "lucide-react"
 
 export default function StorePage() {
   const bestsellers = products.filter((p) => p.category === "bestsellers")
@@ -119,7 +120,17 @@ export default function StorePage() {
               />
             </Link>
             <p className="text-base text-muted-foreground sm:text-lg">
-              B2C Sample App | Powered by Descope.
+              B2C Sample App •{" "}
+              <a
+                href="https://github.com/descope-sample-apps/peek-a-box-b2c-sample-app"
+                target="_blank"
+                rel="noreferrer"
+                className="font-medium transition-colors hover:text-foreground"
+              >
+                Explore the code
+                <ExternalLink className="ml-1 inline h-4 w-4" aria-hidden />
+              </a>
+              {" "}• Powered by Descope.
             </p>
           </div>
         </div>
