@@ -173,8 +173,10 @@ body{
 
 .actions{display:flex;gap:10px;margin-top:18px;flex-wrap:wrap}
 .btn{appearance:none;cursor:pointer;border-radius:999px;font-weight:500;font-size:15px;
-  padding:13px 18px;border:0;flex:1;min-width:150px;text-align:center;
+  padding:13px 18px;border:0;flex:1;min-width:150px;
+  display:inline-flex;align-items:center;justify-content:center;gap:8px;
   transition:opacity .15s ease,background .15s ease,transform .05s ease;font-family:inherit}
+.btn svg{width:15px;height:15px;flex:0 0 auto}
 .btn:active{transform:translateY(1px)}
 /* Primary = the storefront's commit CTA: a dark foreground pill (cf. the cart's
    "Place order" button, bg-foreground / text-background). */
@@ -273,6 +275,7 @@ _BRIDGE = r"""
 
   // ── Shared helpers ──────────────────────────────────────────────────────
   PAB.LOGO = '__LOGO_SVG__';
+  PAB.EXT = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h6v6M10 14 21 3M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h6"/></svg>';
   PAB.money = function (cents, cur) {
     cur = cur || 'USD';
     var v = (Number(cents) || 0) / 100;
@@ -386,9 +389,9 @@ function render(){
     +   (multi ? '<div class="note">Carts with more than one item are confirmed in the browser for your security.</div>' : '')
     +   '<div class="actions">'
     +     (multi
-        ? '<button class="btn primary" data-open>Review &amp; pay in browser</button>'
+        ? '<button class="btn primary" data-open>Review cart &amp; check out'+PAB.EXT+'</button>'
         : '<button class="btn primary" data-complete>Complete purchase</button>'
-          + '<button class="btn outline" data-open>Open in browser</button>')
+          + '<button class="btn outline" data-open>Review cart in browser'+PAB.EXT+'</button>')
     +   '</div>'
     + '</div>';
 
@@ -417,7 +420,7 @@ function render(){
     var e = errs[0];
     root.innerHTML = '<div class="panel"><div class="phead"><div class="tilesm">'+PAB.LOGO+'</div>'
       + '<div><h2>Payment didn’t go through</h2><p>'+PAB.esc(e.content||'')+'</p></div></div>'
-      + (c.continue_url?'<div class="actions"><button class="btn primary" data-open>Try in browser</button></div>':'')
+      + (c.continue_url?'<div class="actions"><button class="btn primary" data-open>Try in browser'+PAB.EXT+'</button></div>':'')
       + '</div>';
     var ob = root.querySelector('[data-open]'); if (ob) ob.addEventListener('click', function(){PAB.openLink(c.continue_url);});
     return;
@@ -426,7 +429,7 @@ function render(){
   if (c.status && c.status !== 'completed'){
     root.innerHTML = '<div class="panel"><div class="phead"><div class="tilesm">'+PAB.LOGO+'</div>'
       + '<div><h2>One more step</h2><p>'+PAB.esc((c.messages&&c.messages[0]&&c.messages[0].content)||'Finish this order in your browser.')+'</p></div></div>'
-      + '<div class="actions"><button class="btn primary" data-open>Continue in browser</button></div></div>';
+      + '<div class="actions"><button class="btn primary" data-open>Continue in browser'+PAB.EXT+'</button></div></div>';
     root.querySelector('[data-open]').addEventListener('click', function(){PAB.openLink(c.continue_url);});
     return;
   }
@@ -445,7 +448,7 @@ function render(){
     +   '<div class="dr"><span class="k">Status</span><span class="chip">Completed</span></div>'
     + '</div>'
     + (simulated ? '<div class="note">Demo mode: no Stripe key configured, so the charge was simulated.</div>' : '')
-    + (link ? '<div class="actions"><button class="btn primary" data-view>View your order</button></div>' : '');
+    + (link ? '<div class="actions"><button class="btn primary" data-view>View your order'+PAB.EXT+'</button></div>' : '');
   var vb = root.querySelector('[data-view]');
   if (vb) vb.addEventListener('click', function(){ PAB.openLink(link); });
 }
