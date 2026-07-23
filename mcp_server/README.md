@@ -24,13 +24,17 @@ The catalog, checkout, and order-confirmation widgets are self-contained inline 
 served from `ui://` resources (see [`widgets.py`](widgets.py)). One implementation
 serves **both** ecosystems:
 
-- **ChatGPT (OpenAI Apps SDK)** — tools carry `_meta["openai/outputTemplate"]`; the
-  widget is served as `text/html+skybridge` and reads data via `window.openai.toolOutput`.
-- **Claude / MCP Apps (SEP-1865)** — tools carry `_meta.ui.resourceUri`; the widget is
-  also served as `text/html;profile=mcp-app` and talks JSON-RPC over `postMessage`.
+- **Claude / MCP Apps (SEP-1865)** — the tool declares `app=AppConfig(resource_uri=…)`
+  (FastMCP `fastmcp.apps`), which serves the view as `text/html;profile=mcp-app`, sets
+  `_meta.ui.resourceUri`, **and advertises the `io.modelcontextprotocol/ui` capability at
+  `initialize`** — the negotiation Claude requires before it will render a `ui://` resource.
+- **ChatGPT (OpenAI Apps SDK)** — the same tool also carries `_meta["openai/outputTemplate"]`
+  pointing at a `text/html+skybridge` variant, read via `window.openai.toolOutput`.
 
-A small in-widget bridge (`window.PAB`) normalizes the two host APIs, so the same HTML
-renders, themes (light/dark), and wires buttons on both platforms.
+A small self-contained in-widget bridge (`window.PAB`) normalizes the two host APIs — it
+reads `window.openai` (ChatGPT) or the MCP Apps `ui/notifications/tool-result` postMessage
+(Claude) — so the same HTML renders, themes (light/dark), and wires buttons on both, with
+no external SDK/CDN.
 
 The widgets mirror the storefront's design (see `components/product-card.tsx` and
 `app/styles/globals.css`): the box-logo + `#number` tile, dark foreground-pill badges,
@@ -40,6 +44,8 @@ in `_fonts.py` — regenerate it with `python scripts/subset_fonts.py` after `np
 
 ## Run locally
 
+Requires **Python ≥ 3.10** (FastMCP v3).
+
 ```bash
 cd mcp_server
 python3 -m venv .venv && source .venv/bin/activate
@@ -47,6 +53,11 @@ pip install -r requirements.txt
 cp .env.example .env          # then fill in DESCOPE_CONFIG_URL (see below)
 python server.py              # serves MCP on http://localhost:8000/mcp
 ```
+
+Per-tool OAuth scopes are enforced with `require_scopes(...)` on each tool: the catalog
+tools are open, while the checkout tools require `dev.ucp.shopping.checkout:manage` and
+`get_orders` requires `dev.ucp.shopping.order:read` — so scoped tools stay hidden until the
+agent completes identity linking.
 
 `DESCOPE_CONFIG_URL` comes from **Descope Console → MCP Servers → your server →
 Well-Known URL**. `STRIPE_SECRET_KEY` and `DATABASE_URL` are optional — without them the

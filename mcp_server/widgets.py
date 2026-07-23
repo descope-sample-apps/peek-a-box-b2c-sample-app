@@ -31,6 +31,8 @@ Spec references:
   * MCP Apps (SEP-1865): https://blog.modelcontextprotocol.io/posts/2026-01-26-mcp-apps/
 """
 
+from fastmcp.apps import AppConfig
+
 from _fonts import FONT_FACE_CSS  # embedded, subsetted Geist (see scripts/subset_fonts.py)
 
 # The storefront box mark (public/Peek-A-Box_icon-light.svg), recolored via
@@ -499,9 +501,23 @@ def _mcp_app_uri(key: str) -> str:
     return f"ui://widget/{key}.mcp-app.html"
 
 
+def widget_app(key: str) -> AppConfig:
+    """The MCP Apps (SEP-1865) config for a widget tool.
+
+    Passed as `@mcp.tool(app=...)`. FastMCP serializes this into the tool's
+    `_meta.ui.resourceUri` AND makes the server advertise the
+    `io.modelcontextprotocol/ui` capability at initialize — the negotiation an
+    MCP Apps host (Claude) requires before it will render a `ui://` resource.
+    """
+    return AppConfig(resource_uri=_mcp_app_uri(key))
+
+
 def widget_meta(key: str) -> dict:
-    """Build the tool-descriptor `_meta` that advertises this widget to both
-    ChatGPT (openai/*) and MCP Apps hosts (ui.*)."""
+    """The ChatGPT (OpenAI Apps SDK) half of a widget tool's `_meta`.
+
+    Passed as `@mcp.tool(meta=...)` alongside `app=widget_app(key)`; the two
+    merge, so the descriptor carries both `openai/outputTemplate` (ChatGPT) and
+    `ui.resourceUri` (MCP Apps)."""
     w = WIDGETS[key]
     return {
         "openai/outputTemplate": _skybridge_uri(key),
@@ -509,16 +525,20 @@ def widget_meta(key: str) -> dict:
         "openai/toolInvocation/invoked": w["invoked"],
         "openai/widgetAccessible": True,
         "openai/widgetDescription": w["description"],
-        "ui": {
-            "resourceUri": _mcp_app_uri(key),
-            "prefersBorder": True,
-        },
     }
 
 
 def register_widgets(mcp) -> None:
-    """Register every widget as two resources: `text/html+skybridge` (ChatGPT)
-    and `text/html;profile=mcp-app` (MCP Apps / Claude), serving identical HTML."""
+    """Register each widget as two `ui://` resources serving identical HTML:
+
+    * `…/{key}.mcp-app.html` — via `AppConfig`, mimeType `text/html;profile=mcp-app`,
+      what Claude / MCP Apps hosts fetch (and what advertises the UI capability).
+    * `…/{key}.html` — mimeType `text/html+skybridge`, what ChatGPT fetches from
+      `openai/outputTemplate`.
+
+    The widgets are fully self-contained (inline HTML/CSS/JS + embedded font, no
+    external requests), so no CSP allow-list is needed.
+    """
     def _make(html):
         def _res():
             return html
@@ -526,18 +546,20 @@ def register_widgets(mcp) -> None:
 
     for key, w in WIDGETS.items():
         html = w["html"]
-        meta = widget_meta(key)
-        mcp.resource(
-            _skybridge_uri(key),
-            name=w["title"],
-            description=w["description"],
-            mime_type="text/html+skybridge",
-            meta=meta,
-        )(_make(html))
+        # Claude / MCP Apps view — a bare AppConfig() marks this resource as a UI
+        # view (mimeType text/html;profile=mcp-app) and makes the server advertise
+        # the UI capability. resource_uri belongs on the *tool*, not the view.
         mcp.resource(
             _mcp_app_uri(key),
-            name=w["title"] + " (MCP Apps)",
+            name=w["title"],
             description=w["description"],
-            mime_type="text/html;profile=mcp-app",
-            meta=meta,
+            app=AppConfig(),
+        )(_make(html))
+        # ChatGPT / Apps SDK variant.
+        mcp.resource(
+            _skybridge_uri(key),
+            name=w["title"] + " (ChatGPT)",
+            description=w["description"],
+            mime_type="text/html+skybridge",
+            meta={"openai/outputTemplate": _skybridge_uri(key)},
         )(_make(html))

@@ -13,10 +13,9 @@ import time
 import uuid
 from typing import Optional
 
-from starlette.types import ASGIApp, Receive, Scope as ASGIScope, Send
-
 from dotenv import load_dotenv
 from fastmcp import FastMCP
+from fastmcp.server.auth import require_scopes
 from fastmcp.server.auth.providers.descope import DescopeProvider
 from fastmcp.server.dependencies import get_access_token
 from starlette.concurrency import run_in_threadpool
@@ -55,6 +54,7 @@ except Exception:
 auth = DescopeProvider(
     config_url=os.environ["DESCOPE_CONFIG_URL"],
     base_url=os.environ.get("MCP_BASE_URL", f"http://localhost:{MCP_PORT}"),
+    scopes_supported=["openid", "profile", "email", _CHECKOUT_SCOPE, _ORDER_READ_SCOPE],
 )
 
 mcp = FastMCP(
@@ -110,32 +110,6 @@ def _decode_jwt_claims(token: str) -> dict:
         return _json.loads(base64.urlsafe_b64decode(payload_b64))
     except Exception:
         return {}
-
-
-def _get_token_scopes() -> set[str]:
-    """Return the set of scopes granted in the current access token."""
-    try:
-        access_token = get_access_token()
-        if access_token and access_token.token:
-            claims = _decode_jwt_claims(access_token.token)
-            scope_str = claims.get("scope", "") or ""
-            return set(scope_str.split())
-    except Exception:
-        pass
-    return set()
-
-
-def _require_scope(scope: str) -> dict | None:
-    """Return a structured error dict if the required scope is not present, else None.
-    """
-    if scope not in _get_token_scopes():
-        return {
-            "ucp": {"version": UCP_VERSION, "status": "error"},
-            "error": "insufficient_scope",
-            "required_scopes": [scope],
-            "error_description": f"The '{scope}' scope is required for this action",
-        }
-    return None
 
 
 def _current_user_sub() -> Optional[str]:
@@ -354,6 +328,7 @@ def _charge_via_stripe(checkout: dict, payment: Optional[dict], idempotency_key:
 # ── Catalog tools ─────────────────────────────────────────────────────────────
 
 @mcp.tool(
+    app=widgets.widget_app("catalog"),
     meta=widgets.widget_meta("catalog"),
     annotations={"readOnlyHint": True, "openWorldHint": False, "destructiveHint": False},
 )
@@ -403,6 +378,8 @@ def get_product(id: str) -> dict:
 # ── Checkout tools ────────────────────────────────────────────────────────────
 
 @mcp.tool(
+    auth=require_scopes(_CHECKOUT_SCOPE),
+    app=widgets.widget_app("checkout"),
     meta=widgets.widget_meta("checkout"),
     annotations={"readOnlyHint": False, "openWorldHint": False, "destructiveHint": False},
 )
@@ -424,8 +401,6 @@ def create_checkout(
         buyer: Optional buyer info with email, first_name, last_name.
         fulfillment: Optional fulfillment with shipping destinations.
     """
-    if err := _require_scope(_CHECKOUT_SCOPE):
-        return err
     if not line_items:
         return {
             "ucp": {"version": UCP_VERSION, "status": "error"},
@@ -523,6 +498,8 @@ def _get_checkout_response(id: str) -> dict:
 
 
 @mcp.tool(
+    auth=require_scopes(_CHECKOUT_SCOPE),
+    app=widgets.widget_app("checkout"),
     meta=widgets.widget_meta("checkout"),
     annotations={"readOnlyHint": True, "openWorldHint": False, "destructiveHint": False},
 )
@@ -533,8 +510,6 @@ def get_checkout(id: str) -> dict:
     Args:
         id: The checkout session ID returned by create_checkout.
     """
-    if err := _require_scope(_CHECKOUT_SCOPE):
-        return err
     return _get_checkout_response(id)
 
 
@@ -554,6 +529,8 @@ async def get_checkout_session(request: Request) -> JSONResponse:
 
 
 @mcp.tool(
+    auth=require_scopes(_CHECKOUT_SCOPE),
+    app=widgets.widget_app("checkout"),
     meta=widgets.widget_meta("checkout"),
     annotations={"readOnlyHint": False, "openWorldHint": False, "destructiveHint": False},
 )
@@ -574,8 +551,6 @@ def update_checkout(
         fulfillment: Updated fulfillment / shipping details (optional).
         currency: Updated currency code (optional).
     """
-    if err := _require_scope(_CHECKOUT_SCOPE):
-        return err
     checkout = _load_checkout(id)
     if not checkout:
         return {
@@ -607,6 +582,8 @@ def update_checkout(
 
 
 @mcp.tool(
+    auth=require_scopes(_CHECKOUT_SCOPE),
+    app=widgets.widget_app("confirmation"),
     meta=widgets.widget_meta("confirmation"),
     annotations={"readOnlyHint": False, "openWorldHint": False, "destructiveHint": False},
 )
@@ -632,8 +609,6 @@ def complete_checkout(
                               "type": "tokenized_card", "selected": true,
                               "credential": {"payment_method": "pm_card_visa"}}]}
     """
-    if err := _require_scope(_CHECKOUT_SCOPE):
-        return err
     checkout = _load_checkout(id)
     if not checkout:
         return {
@@ -764,7 +739,7 @@ def complete_checkout(
     return response
 
 
-@mcp.tool()
+@mcp.tool(auth=require_scopes(_CHECKOUT_SCOPE))
 def cancel_checkout(id: str, idempotency_key: str) -> dict:
     """
     Cancel an existing checkout session.
@@ -773,8 +748,6 @@ def cancel_checkout(id: str, idempotency_key: str) -> dict:
         id: The checkout session ID to cancel.
         idempotency_key: A UUID for retry safety (required by UCP spec).
     """
-    if err := _require_scope(_CHECKOUT_SCOPE):
-        return err
     checkout = _load_checkout(id)
     if not checkout:
         return {
@@ -789,13 +762,11 @@ def cancel_checkout(id: str, idempotency_key: str) -> dict:
 
 # ── Order tools ───────────────────────────────────────────────────────────────
 
-@mcp.tool()
+@mcp.tool(auth=require_scopes(_ORDER_READ_SCOPE))
 def get_orders() -> dict:
     """
     List the authenticated user's past orders (most recent first).
     """
-    if err := _require_scope(_ORDER_READ_SCOPE):
-        return err
     sub = _current_user_sub()
     orders = _load_orders(sub) if sub else []
     return {"ucp": _ucp_envelope(), "orders": orders, "total": len(orders)}
@@ -809,167 +780,9 @@ widgets.register_widgets(mcp)
 
 
 # ── Entry point ───────────────────────────────────────────────────────────────
-# Required scope per tool — checked at transport layer before FastMCP runs. Returns 403 for insufficient scope.
-
-_TOOL_REQUIRED_SCOPES: dict[str, str] = {
-    "create_checkout":   _CHECKOUT_SCOPE,
-    "get_checkout":      _CHECKOUT_SCOPE,
-    "update_checkout":   _CHECKOUT_SCOPE,
-    "complete_checkout": _CHECKOUT_SCOPE,
-    "cancel_checkout":   _CHECKOUT_SCOPE,
-    "get_orders":        _ORDER_READ_SCOPE,
-}
-
-
-def _scopes_from_bearer(authorization: str) -> set[str]:
-    """Extract OAuth scopes from a raw Authorization header value.
-
-    Called after RequireAuthMiddleware has verified the JWT; we only read
-    payload claims here to check the scope set.
-    """
-    if not authorization.lower().startswith("bearer "):
-        return set()
-    token = authorization[7:].strip()
-    try:
-        payload_b64 = token.split(".")[1]
-        payload_b64 += "=" * (4 - len(payload_b64) % 4)
-        claims = _json.loads(base64.urlsafe_b64decode(payload_b64))
-        return set((claims.get("scope") or "").split())
-    except Exception:
-        return set()
-
-
-class _OAuthScopeMiddleware:
-    """Transport-layer OAuth scope enforcement per MCP authorization spec.
-
-    Intercepts ``tools/call`` requests before FastMCP processes them.
-
-    * No token present  → HTTP 401, ``invalid_token``
-    * Token lacks scope → HTTP 403, ``insufficient_scope``
-    * Token OK / tool has no scope requirement → pass through
-    """
-
-    def __init__(self, app: ASGIApp, resource_metadata_url: str | None = None) -> None:
-        self.app = app
-        self.resource_metadata_url = resource_metadata_url
-
-    async def __call__(self, scope: ASGIScope, receive: Receive, send: Send) -> None:
-        if scope["type"] != "http" or scope.get("method") != "POST":
-            await self.app(scope, receive, send)
-            return
-
-        # Buffer body so we can peek at the tool name and replay it.
-        chunks: list[bytes] = []
-        more = True
-        while more:
-            msg = await receive()
-            chunks.append(msg.get("body", b""))
-            more = msg.get("more_body", False)
-        body = b"".join(chunks)
-
-        tool_name: str | None = None
-        try:
-            rpc = _json.loads(body)
-            if rpc.get("method") == "tools/call":
-                tool_name = rpc.get("params", {}).get("name")
-        except Exception:
-            pass
-
-        required = _TOOL_REQUIRED_SCOPES.get(tool_name or "")
-        if required:
-            headers_raw: dict[bytes, bytes] = dict(scope.get("headers", []))
-            authorization = headers_raw.get(b"authorization", b"").decode()
-            has_token = authorization.lower().startswith("bearer ")
-
-            if not has_token:
-                # No token at all → identity linking required.
-                await self._send_error(send, 401, "identity_required", required,
-                                       "User identity is required; link an account to continue.")
-                return
-
-            if required not in _scopes_from_bearer(authorization):
-                await self._send_error(send, 403, "insufficient_scope", required,
-                                       f"The '{required}' scope is required for this action.",
-                                       www_error="insufficient_scope")
-                return
-
-        replayed = False
-
-        async def replay_receive() -> dict:
-            nonlocal replayed
-            if not replayed:
-                replayed = True
-                return {"type": "http.request", "body": body, "more_body": False}
-            return await receive()
-
-        await self.app(scope, replay_receive, send)
-
-    async def _send_error(
-        self,
-        send: Send,
-        status: int,
-        ucp_code: str,
-        required_scope: str,
-        description: str,
-        www_error: str | None = None,
-    ) -> None:
-
-        params: list[str] = []
-        if www_error:
-            params.append(f'error="{www_error}"')
-            params.append(f'error_description="{description}"')
-        params.append(f'scope="{required_scope}"')
-        if self.resource_metadata_url:
-            params.append(f'resource_metadata="{self.resource_metadata_url}"')
-        www_auth = "Bearer " + ", ".join(params)
-
-        # UCP error envelope; the message carries the spec code
-        # (identity_required / insufficient_scope).
-        body = _json.dumps({
-            "ucp": {"version": UCP_VERSION, "status": "error"},
-            "messages": [{
-                "type": "error",
-                "code": ucp_code,
-                "content": description,
-                "severity": "unrecoverable",
-            }],
-            **({"required_scopes": [required_scope]} if ucp_code == "insufficient_scope" else {}),
-        }).encode()
-
-        await send({
-            "type": "http.response.start",
-            "status": status,
-            "headers": [
-                (b"content-type", b"application/json"),
-                (b"content-length", str(len(body)).encode()),
-                (b"www-authenticate", www_auth.encode()),
-            ],
-        })
-        await send({"type": "http.response.body", "body": body, "more_body": False})
-
-import fastmcp.server.http as _fmcp_http
-from fastmcp.server.auth.middleware import RequireAuthMiddleware as _BaseRequireAuthMiddleware
-
-
-class _ScopedRequireAuthMiddleware:
-    """Require valid Descope auth for every MCP request, with per-tool scope checks.
-
-    Wraps FastMCP's RequireAuthMiddleware (JWT verification) around
-    _OAuthScopeMiddleware (checkout/cart scope enforcement).
-    """
-
-    def __init__(self, app, required_scopes=None, resource_metadata_url=None):
-        self.app = _BaseRequireAuthMiddleware(
-            _OAuthScopeMiddleware(app, resource_metadata_url=resource_metadata_url),
-            required_scopes,
-            resource_metadata_url,
-        )
-
-    async def __call__(self, scope, receive, send):
-        await self.app(scope, receive, send)
-
-
-_fmcp_http.RequireAuthMiddleware = _ScopedRequireAuthMiddleware
+# Per-tool OAuth scopes are enforced by require_scopes(...) on each tool
+# declaration above (checked by FastMCP before the tool runs); no custom
+# transport middleware is needed.
 
 if __name__ == "__main__":
-    mcp.run(transport="http", host="0.0.0.0", port=MCP_PORT)
+    mcp.run(transport="http", host="0.0.0.0", port=MCP_PORT, path="/mcp")
