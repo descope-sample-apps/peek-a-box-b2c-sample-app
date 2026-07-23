@@ -64,9 +64,17 @@ cd mcp_server && source .venv/bin/activate
 python test_server.py   # 41 checks: tool _meta, ui:// resources, storefront parity, buying flow
 ```
 
-The widgets can be viewed in any browser by injecting a mock `window.openai` with sample
-`toolOutput` (see the render-test harness). Both light and dark themes and all button
-callbacks (`sendFollowUpMessage`, `openExternal`) are exercised.
+To view the widgets in a browser without a running MCP host, render them with a mock
+`window.openai` (sample `toolOutput` + stubbed callbacks) injected:
+
+```bash
+python scripts/preview_widgets.py                       # writes ./widget-preview/*.html
+python -m http.server --directory widget-preview 8901
+# open http://localhost:8901/catalog.light.html  (also checkout.*, confirmation.*, .dark)
+```
+
+Each page logs `callTool` / `sendFollowUpMessage` / `openExternal` to the console, so the
+button callbacks are observable in both light and dark themes.
 
 ### Live in-client test
 

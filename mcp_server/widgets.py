@@ -222,6 +222,13 @@ _BRIDGE = r"""
   function applyTheme(){ document.documentElement.setAttribute('data-theme', PAB.theme()); }
   PAB.emit = function () { applyTheme(); window.dispatchEvent(new CustomEvent('pab:data')); };
 
+  var initId = null, initialized = false;
+  function sendInitialized(){
+    if (initialized) return;
+    initialized = true;
+    try { window.parent.postMessage({ jsonrpc:'2.0', method:'ui/notifications/initialized', params:{} }, '*'); } catch (e) {}
+  }
+
   // ChatGPT — globals updates (theme, toolOutput, displayMode, ...)
   window.addEventListener('openai:set_globals', PAB.emit);
 
@@ -241,17 +248,22 @@ _BRIDGE = r"""
       if (m.params.hostContext.theme) document.documentElement.setAttribute('data-theme', m.params.hostContext.theme);
       PAB.emit();
     }
-    if (m.result && m.result.hostContext && m.result.hostContext.theme) {
-      document.documentElement.setAttribute('data-theme', m.result.hostContext.theme);
+    // Response to our ui/initialize: apply host context, THEN announce initialized
+    // (MCP lifecycle order — send `initialized` only after the initialize result).
+    if (initId && m.id === initId && m.result) {
+      var hc = m.result.hostContext;
+      if (hc && hc.theme) document.documentElement.setAttribute('data-theme', hc.theme);
+      sendInitialized();
       PAB.emit();
     }
   });
 
-  // MCP Apps handshake — announce readiness so the host delivers the tool result.
+  // MCP Apps handshake — send ui/initialize; `initialized` is sent only after its
+  // response arrives (see the message listener above), never before.
+  initId = nid('init');
   try {
-    window.parent.postMessage({ jsonrpc:'2.0', id:nid('init'), method:'ui/initialize',
+    window.parent.postMessage({ jsonrpc:'2.0', id:initId, method:'ui/initialize',
       params:{ protocolVersion:'2026-01-26', capabilities:{}, clientInfo:{ name:'peek-a-box-widget', version:'1.0.0' } } }, '*');
-    window.parent.postMessage({ jsonrpc:'2.0', method:'ui/notifications/initialized', params:{} }, '*');
   } catch (e) {}
 
   // ── Shared helpers ──────────────────────────────────────────────────────
@@ -276,8 +288,12 @@ _BRIDGE = r"""
   };
 
   applyTheme();
-  if (document.readyState !== 'loading') PAB.emit();
-  else document.addEventListener('DOMContentLoaded', PAB.emit);
+  // Defer the first paint so the render script (the next <script>) has registered its
+  // pab:data listener first. On an already-parsed document (readyState !== 'loading')
+  // a synchronous emit would fire before anyone is listening and stick on "Loading…".
+  function firstPaint(){ PAB.emit(); }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', firstPaint);
+  else setTimeout(firstPaint, 0);
 })();
 """.replace("__LOGO_SVG__", _LOGO_SVG.replace("'", "\\'"))
 
@@ -321,18 +337,19 @@ window.addEventListener('pab:data', render);
 """).replace("__PLUS__", _PLUS.replace("'", "\\'"))
 
 _CHECKOUT_JS = r"""
-function lineRow(li){
+function lineRow(li, cur){
   var it = li.item || {};
   var num = PAB.boxNum(it.title, it.id);
+  var q = (li.quantity == null ? 1 : li.quantity);
   return '<div class="li"><div class="tilesm">'+PAB.LOGO+'</div>'
     + '<div class="info"><div class="nm">'+PAB.esc(it.title||('Box #'+num))+'</div>'
-    + '<div class="qty">Qty '+(li.quantity||1)+'</div></div>'
-    + '<div class="amt">'+PAB.money((it.price||0)*(li.quantity||1))+'</div></div>';
+    + '<div class="qty">Qty '+q+'</div></div>'
+    + '<div class="amt">'+PAB.money((it.price||0)*q, cur)+'</div></div>';
 }
-function summaryRow(t){
+function summaryRow(t, cur){
   var label = t.display_text || ({subtotal:'Subtotal', fulfillment:'Shipping', total:'Total', tax:'Tax'}[t.type] || t.type);
-  if (t.type === 'total') return '<div class="tot"><span>'+PAB.esc(label)+'</span><span class="amt">'+PAB.money(t.amount)+'</span></div>';
-  return '<div class="sr"><span>'+PAB.esc(label)+'</span><span>'+PAB.money(t.amount)+'</span></div>';
+  if (t.type === 'total') return '<div class="tot"><span>'+PAB.esc(label)+'</span><span class="amt">'+PAB.money(t.amount, cur)+'</span></div>';
+  return '<div class="sr"><span>'+PAB.esc(label)+'</span><span>'+PAB.money(t.amount, cur)+'</span></div>';
 }
 function render(){
   var c = PAB.getData() || {};
@@ -349,7 +366,7 @@ function render(){
   var items = c.line_items || [];
   var totals = c.totals || [];
   var buyer = c.buyer || null;
-  var qty = items.reduce(function(a,li){return a+(li.quantity||1);},0);
+  var qty = items.reduce(function(a,li){return a+(li.quantity == null ? 1 : li.quantity);},0);
   var multi = qty > 1;
   var buyerHtml = buyer && (buyer.name || buyer.email)
     ? '<div class="buyer">For '+PAB.esc(buyer.name||'')+(buyer.email?(' &middot; '+PAB.esc(buyer.email)):'')+'</div>' : '';
@@ -358,8 +375,8 @@ function render(){
     + '<div class="panel">'
     +   '<div class="phead"><div class="tilesm">'+PAB.LOGO+'</div><div>'
     +     '<h2>Review your order</h2><p>'+items.length+' item'+(items.length===1?'':'s')+'</p></div></div>'
-    +   '<div class="lines">'+items.map(lineRow).join('')+'</div>'
-    +   '<div class="summary">'+totals.map(summaryRow).join('')+'</div>'
+    +   '<div class="lines">'+items.map(function(li){return lineRow(li, c.currency);}).join('')+'</div>'
+    +   '<div class="summary">'+totals.map(function(t){return summaryRow(t, c.currency);}).join('')+'</div>'
     +   buyerHtml
     +   (multi ? '<div class="note">Carts with more than one item are confirmed in the browser for your security.</div>' : '')
     +   '<div class="actions">'

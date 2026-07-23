@@ -42,3 +42,6 @@ __pycache__/
 *.pyc
 .venv/
 venv/
+
+# widget preview output (scripts/preview_widgets.py)
+mcp_server/widget-preview/
