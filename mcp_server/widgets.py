@@ -172,14 +172,17 @@ body{
   padding:3px 11px;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.05em}
 
 .actions{display:flex;gap:10px;margin-top:18px;flex-wrap:wrap}
-.btn{appearance:none;cursor:pointer;border-radius:999px;font-weight:500;font-size:14px;
-  padding:11px 18px;border:0;flex:1;min-width:150px;text-align:center;
-  transition:filter .15s ease,background .15s ease,transform .05s ease;font-family:inherit}
+.btn{appearance:none;cursor:pointer;border-radius:999px;font-weight:500;font-size:15px;
+  padding:13px 18px;border:0;flex:1;min-width:150px;text-align:center;
+  transition:opacity .15s ease,background .15s ease,transform .05s ease;font-family:inherit}
 .btn:active{transform:translateY(1px)}
-.btn.primary{background:var(--primary);color:var(--primary-fg)}
-.btn.primary:hover{filter:brightness(.94)}
+/* Primary = the storefront's commit CTA: a dark foreground pill (cf. the cart's
+   "Place order" button, bg-foreground / text-background). */
+.btn.primary{background:var(--fg);color:var(--bg)}
+.btn.primary:hover{opacity:.9}
+/* Secondary = the storefront's bordered pill (border-2 border-foreground/20). */
 .btn.outline{background:transparent;color:var(--fg);
-  border:1.5px solid color-mix(in oklch, var(--fg) 22%, transparent)}
+  border:2px solid color-mix(in oklch, var(--fg) 20%, transparent)}
 .btn.outline:hover{background:color-mix(in oklch, var(--muted) 70%, transparent)}
 .btn[disabled]{opacity:.6;cursor:default}
 .empty{color:var(--muted-fg);text-align:center;padding:30px 18px;font-size:14.5px;font-style:italic}
