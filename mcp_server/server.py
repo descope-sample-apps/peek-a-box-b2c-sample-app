@@ -23,6 +23,8 @@ from starlette.concurrency import run_in_threadpool
 from starlette.requests import Request
 from starlette.responses import JSONResponse
 
+import widgets
+
 load_dotenv()
 
 UCP_VERSION = "2026-04-08"
@@ -76,7 +78,7 @@ PRODUCTS = [
     {"id": "box-99999", "name": "Box #99999", "description": "Too Many Nines",                "price": 9.99,  "category": "bestsellers", "badge": None},
     {"id": "box-67",    "name": "Box #67",    "description": "This Makes Our CEO Laugh",      "price": 67.00, "category": "premium",     "badge": "CEO Pick"},
     {"id": "box-0",     "name": "Box #0",     "description": "The First One. Or Is It?",      "price": 0.01,  "category": "new",         "badge": None},
-    {"id": "box-pi",    "name": "Box #π",     "description": "Irrational Value",              "price": 3.14,  "category": "premium",     "badge": None},
+    {"id": "box-π",     "name": "Box #π",     "description": "Never Ends. Neither Will Your Curiosity.", "price": 31.41, "category": "premium",     "badge": None},
 ]
 
 def _to_ucp_item(p: dict) -> dict:
@@ -351,7 +353,10 @@ def _charge_via_stripe(checkout: dict, payment: Optional[dict], idempotency_key:
 
 # ── Catalog tools ─────────────────────────────────────────────────────────────
 
-@mcp.tool()
+@mcp.tool(
+    meta=widgets.widget_meta("catalog"),
+    annotations={"readOnlyHint": True, "openWorldHint": False, "destructiveHint": False},
+)
 def lookup_catalog(
     query: Optional[str] = None,
     category: Optional[str] = None,
@@ -397,7 +402,10 @@ def get_product(id: str) -> dict:
 
 # ── Checkout tools ────────────────────────────────────────────────────────────
 
-@mcp.tool()
+@mcp.tool(
+    meta=widgets.widget_meta("checkout"),
+    annotations={"readOnlyHint": False, "openWorldHint": False, "destructiveHint": False},
+)
 def create_checkout(
     line_items: list[dict],
     currency: str = "USD",
@@ -514,7 +522,10 @@ def _get_checkout_response(id: str) -> dict:
     return {"ucp": _ucp_envelope(), **public}
 
 
-@mcp.tool()
+@mcp.tool(
+    meta=widgets.widget_meta("checkout"),
+    annotations={"readOnlyHint": True, "openWorldHint": False, "destructiveHint": False},
+)
 def get_checkout(id: str) -> dict:
     """
     Retrieve an existing checkout session by ID.
@@ -542,7 +553,10 @@ async def get_checkout_session(request: Request) -> JSONResponse:
     return JSONResponse({"ucp": _ucp_envelope(), **checkout})
 
 
-@mcp.tool()
+@mcp.tool(
+    meta=widgets.widget_meta("checkout"),
+    annotations={"readOnlyHint": False, "openWorldHint": False, "destructiveHint": False},
+)
 def update_checkout(
     id: str,
     line_items: Optional[list[dict]] = None,
@@ -592,7 +606,10 @@ def update_checkout(
     return {"ucp": _ucp_envelope(), **checkout}
 
 
-@mcp.tool()
+@mcp.tool(
+    meta=widgets.widget_meta("confirmation"),
+    annotations={"readOnlyHint": False, "openWorldHint": False, "destructiveHint": False},
+)
 def complete_checkout(
     id: str,
     idempotency_key: str,
@@ -782,6 +799,13 @@ def get_orders() -> dict:
     sub = _current_user_sub()
     orders = _load_orders(sub) if sub else []
     return {"ucp": _ucp_envelope(), "orders": orders, "total": len(orders)}
+
+
+# ── MCP UI components ─────────────────────────────────────────────────────────
+# Register the catalog / checkout / confirmation widgets as ui:// resources so
+# hosts that support UI (ChatGPT, Claude / MCP Apps) render an interactive buying
+# experience. See widgets.py for the dual-protocol details.
+widgets.register_widgets(mcp)
 
 
 # ── Entry point ───────────────────────────────────────────────────────────────

@@ -36,3 +36,12 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# python (mcp_server)
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# widget preview output (scripts/preview_widgets.py)
+mcp_server/widget-preview/
