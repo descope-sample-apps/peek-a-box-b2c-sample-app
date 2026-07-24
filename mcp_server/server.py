@@ -390,7 +390,11 @@ def create_checkout(
     fulfillment: Optional[dict] = None,
 ) -> dict:
     """
-    Create a new UCP checkout session.
+    Create a new UCP checkout session. Does NOT charge — it returns a checkout
+    to review, including a `continue_url` the user can open to review the cart and
+    place the order in the browser. After creating a checkout, share that link and
+    ask the user to confirm; call complete_checkout only once they explicitly say
+    to place the order.
 
     Args:
         line_items: List of items to purchase. Each must have:
@@ -593,7 +597,11 @@ def complete_checkout(
     payment: Optional[dict] = None,
 ) -> dict:
     """
-    Finalize a checkout session and place the order.
+    Finalize a checkout session and place the order. This CHARGES the buyer, so
+    only call it after the user has reviewed the checkout (see the `continue_url`
+    from create_checkout) and has explicitly confirmed they want to place the
+    order — do not call it automatically right after create_checkout. Carts with
+    more than one item are always handed off to the browser to review and pay.
 
     Charges the cart total via Stripe (the UCP payment handler). Peek-A-Box is
     the merchant of record, so the agent submits a tokenized card — never raw

@@ -108,7 +108,10 @@ async def main():
             check(f"{wkey} self-contained html",
                   "window.PAB" in html and "<!doctype html>" in html and "openai:set_globals" in html)
 
-        # 4) catalog reflects the storefront (lib/products.ts) — box-π at $31.41.
+        # 4) catalog — "what boxes can I buy?" lists all 9, and mirrors the
+        #    storefront (lib/products.ts): box-π at $31.41.
+        full = await client.call_tool("lookup_catalog", {"limit": 50})
+        check("catalog lists all 9 boxes", full.structured_content.get("total") == 9, full.structured_content.get("total"))
         prem = await client.call_tool("lookup_catalog", {"category": "premium"})
         ids = {i["id"]: i for i in prem.structured_content["items"]}
         check("catalog has box-π", "box-π" in ids, list(ids))
@@ -133,7 +136,9 @@ async def main():
 
     c = server.create_checkout(line_items=[{"id": "li_1", "item": {"id": "box-42"}, "quantity": 1}])
     cid = c["id"]
-    check("create_checkout incomplete", c.get("status") == "incomplete", c.get("status"))
+    check("create_checkout does NOT charge (status incomplete)", c.get("status") == "incomplete", c.get("status"))
+    check("create_checkout returns the review link (continue_url)",
+          isinstance(c.get("continue_url"), str) and ("/cart?session=" + cid) in c["continue_url"], c.get("continue_url"))
     check("buyer auto-filled from identity claims", (c.get("buyer") or {}).get("email") == "ada@example.com", c.get("buyer"))
     check("total = 4200", any(t["type"] == "total" and t["amount"] == 4200 for t in c["totals"]), c["totals"])
 
@@ -155,6 +160,7 @@ async def main():
     c2 = server.create_checkout(line_items=[{"id": "li_1", "item": {"id": "box-42"}, "quantity": 2}])
     comp2 = server.complete_checkout(id=c2["id"], idempotency_key="idem-2")
     check("multi-item complete -> requires_action", comp2.get("status") == "requires_action", comp2.get("status"))
+    check("multi-item hands off with the browser link", isinstance(comp2.get("continue_url"), str), comp2.get("continue_url"))
 
     print(f"\n{sum(_ok)}/{len(_ok)} checks passed")
     return 0 if all(_ok) else 1
