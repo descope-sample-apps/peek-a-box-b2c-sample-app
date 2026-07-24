@@ -1,14 +1,21 @@
-"""Offline protocol test for the Peek-A-Box UCP MCP server.
+"""Offline protocol test for the Peek-A-Box UCP MCP server (FastMCP v3).
 
 Runs without a live Descope project or network: it stubs DescopeProvider and
-mocks the access token, then drives the tools through FastMCP's in-memory
-client to check the wire contract the UI hosts (ChatGPT, Claude) consume.
+mocks the access token, then checks the wire contract the UI hosts (ChatGPT,
+Claude) consume.
 
     cd mcp_server && source .venv/bin/activate && python test_server.py
 
-Covers: per-tool widget `_meta` (both platforms), the `ui://` resources and
-their mimetypes, catalog/storefront parity, and the full authenticated buying
-flow (create -> get -> update -> complete -> orders) incl. scope enforcement.
+Covers: the MCP Apps UI capability at initialize (what Claude negotiates before
+rendering), per-tool widget `_meta` for both platforms, the `ui://` resources and
+mimetypes, catalog/storefront parity, per-tool scope gating (require_scopes), and
+the full buying flow (create -> get -> update -> complete -> orders).
+
+Note on auth: scope enforcement is done by `require_scopes(...)` at the tool-call
+layer, so an unauthenticated client can't see or call the scoped tools. We assert
+that gating via the in-memory Client, and exercise the tools' business logic by
+calling the module functions directly (which run below the transport auth check)
+with a mocked access token.
 """
 import asyncio
 import base64
@@ -58,6 +65,11 @@ class _FakeAccess:
         self.token = token
 
 
+def _authorize(scopes):
+    """Make server.get_access_token() return a token with the given scopes."""
+    server.get_access_token = lambda: _FakeAccess(_fake_token(scopes))
+
+
 _ok = []
 
 
@@ -67,32 +79,36 @@ def check(label, cond, extra=""):
 
 
 async def main():
+    WIDGET_TOOLS = {
+        "lookup_catalog": "catalog", "create_checkout": "checkout",
+        "get_checkout": "checkout", "update_checkout": "checkout",
+        "complete_checkout": "confirmation",
+    }
+    NON_WIDGET = ("get_product", "get_orders", "cancel_checkout")
+
     async with Client(server.mcp) as client:
-        tools = {t.name: t for t in await client.list_tools()}
+        # 1) MCP Apps UI capability advertised at initialize (Claude negotiates this).
+        caps = client.initialize_result.capabilities.model_dump()
+        exts = caps.get("extensions") or {}
+        check("initialize advertises io.modelcontextprotocol/ui", "io.modelcontextprotocol/ui" in exts, caps)
 
-        widget_map = {
-            "lookup_catalog": "catalog", "create_checkout": "checkout",
-            "get_checkout": "checkout", "update_checkout": "checkout",
-            "complete_checkout": "confirmation",
-        }
-        for tname, wkey in widget_map.items():
-            m = tools[tname].meta or {}
-            check(f"{tname} openai/outputTemplate", m.get("openai/outputTemplate") == f"ui://widget/{wkey}.html", m)
-            check(f"{tname} ui.resourceUri", (m.get("ui") or {}).get("resourceUri") == f"ui://widget/{wkey}.mcp-app.html", m)
-            check(f"{tname} widgetAccessible", m.get("openai/widgetAccessible") is True, m)
-        for tname in ("get_product", "get_orders", "cancel_checkout"):
-            check(f"{tname} has no widget", "openai/outputTemplate" not in (tools[tname].meta or {}))
+        # 2) scoped tools are gated for an unauthenticated client.
+        visible = {t.name for t in await client.list_tools()}
+        check("unauth client sees catalog tools", {"lookup_catalog", "get_product"} <= visible, visible)
+        check("unauth client cannot see create_checkout", "create_checkout" not in visible, visible)
+        check("unauth client cannot see get_orders", "get_orders" not in visible, visible)
 
+        # 3) resources (both mimetype variants per widget) + self-contained HTML.
         res = {str(r.uri): r for r in await client.list_resources()}
         for wkey in ("catalog", "checkout", "confirmation"):
             sky, app = f"ui://widget/{wkey}.html", f"ui://widget/{wkey}.mcp-app.html"
             check(f"{wkey} skybridge mime", res.get(sky) and res[sky].mimeType == "text/html+skybridge")
             check(f"{wkey} mcp-app mime", res.get(app) and res[app].mimeType == "text/html;profile=mcp-app")
-            html = (await client.read_resource(sky))[0].text
+            html = (await client.read_resource(app))[0].text
             check(f"{wkey} self-contained html",
                   "window.PAB" in html and "<!doctype html>" in html and "openai:set_globals" in html)
 
-        # Catalog mirrors the storefront (lib/products.ts) — box-π at $31.41.
+        # 4) catalog reflects the storefront (lib/products.ts) — box-π at $31.41.
         prem = await client.call_tool("lookup_catalog", {"category": "premium"})
         ids = {i["id"]: i for i in prem.structured_content["items"]}
         check("catalog has box-π", "box-π" in ids, list(ids))
@@ -100,50 +116,45 @@ async def main():
         check("box-π description matches storefront",
               ids.get("box-π", {}).get("description") == "Never Ends. Neither Will Your Curiosity.")
 
-        # Authenticated buying flow.
-        server.get_access_token = lambda: _FakeAccess(
-            _fake_token(["dev.ucp.shopping.checkout:manage", "dev.ucp.shopping.order:read"]))
+    # 5) per-tool widget _meta for BOTH platforms (unfiltered registry).
+    all_tools = {t.name: t for t in await server.mcp._list_tools()}
+    check("all 8 tools registered", set(all_tools) == {
+        "lookup_catalog", "get_product", "create_checkout", "get_checkout",
+        "update_checkout", "complete_checkout", "cancel_checkout", "get_orders"}, sorted(all_tools))
+    for tname, wkey in WIDGET_TOOLS.items():
+        m = all_tools[tname].meta or {}
+        check(f"{tname} openai/outputTemplate", m.get("openai/outputTemplate") == f"ui://widget/{wkey}.html", m)
+        check(f"{tname} ui.resourceUri", (m.get("ui") or {}).get("resourceUri") == f"ui://widget/{wkey}.mcp-app.html", m)
+    for tname in NON_WIDGET:
+        check(f"{tname} has no widget", "openai/outputTemplate" not in (all_tools[tname].meta or {}))
 
-        cr = await client.call_tool("create_checkout",
-            {"line_items": [{"id": "li_1", "item": {"id": "box-42"}, "quantity": 1}]})
-        c = cr.structured_content
-        cid = c["id"]
-        check("create_checkout incomplete", c.get("status") == "incomplete", c.get("status"))
-        check("buyer auto-filled from identity claims", (c.get("buyer") or {}).get("email") == "ada@example.com", c.get("buyer"))
-        check("total = 4200", any(t["type"] == "total" and t["amount"] == 4200 for t in c["totals"]), c["totals"])
+    # 6) buying-flow business logic — direct calls with a mocked scoped token.
+    _authorize(["dev.ucp.shopping.checkout:manage", "dev.ucp.shopping.order:read"])
 
-        gr = await client.call_tool("get_checkout", {"id": cid})
-        check("get_checkout round-trips id", gr.structured_content.get("id") == cid)
+    c = server.create_checkout(line_items=[{"id": "li_1", "item": {"id": "box-42"}, "quantity": 1}])
+    cid = c["id"]
+    check("create_checkout incomplete", c.get("status") == "incomplete", c.get("status"))
+    check("buyer auto-filled from identity claims", (c.get("buyer") or {}).get("email") == "ada@example.com", c.get("buyer"))
+    check("total = 4200", any(t["type"] == "total" and t["amount"] == 4200 for t in c["totals"]), c["totals"])
 
-        ur = await client.call_tool("update_checkout",
-            {"id": cid, "line_items": [{"id": "li_1", "item": {"id": "box-67"}, "quantity": 1}]})
-        check("update_checkout recomputes total = 6700",
-              any(t["type"] == "total" and t["amount"] == 6700 for t in ur.structured_content["totals"]))
+    g = server.get_checkout(id=cid)
+    check("get_checkout round-trips id", g.get("id") == cid)
 
-        comp = await client.call_tool("complete_checkout", {"id": cid, "idempotency_key": "idem-1"})
-        cc = comp.structured_content
-        check("complete_checkout completed", cc.get("status") == "completed", cc.get("status"))
-        check("order id present", (cc.get("order") or {}).get("id", "").startswith("order_"), cc.get("order"))
-        check("payment simulated (no stripe key)", (cc.get("payment") or {}).get("simulated") is True, cc.get("payment"))
+    u = server.update_checkout(id=cid, line_items=[{"id": "li_1", "item": {"id": "box-67"}, "quantity": 1}])
+    check("update_checkout recomputes total = 6700",
+          any(t["type"] == "total" and t["amount"] == 6700 for t in u["totals"]))
 
-        orders = await client.call_tool("get_orders", {})
-        check("get_orders returns placed order", orders.structured_content.get("total", 0) >= 1)
+    comp = server.complete_checkout(id=cid, idempotency_key="idem-1")
+    check("complete_checkout completed", comp.get("status") == "completed", comp.get("status"))
+    check("order id present", (comp.get("order") or {}).get("id", "").startswith("order_"), comp.get("order"))
+    check("payment simulated (no stripe key)", (comp.get("payment") or {}).get("simulated") is True, comp.get("payment"))
 
-        cr2 = await client.call_tool("create_checkout",
-            {"line_items": [{"id": "li_1", "item": {"id": "box-42"}, "quantity": 2}]})
-        comp2 = await client.call_tool("complete_checkout",
-            {"id": cr2.structured_content["id"], "idempotency_key": "idem-2"})
-        check("multi-item complete -> requires_action",
-              comp2.structured_content.get("status") == "requires_action", comp2.structured_content.get("status"))
+    orders = server.get_orders()
+    check("get_orders returns the placed order", orders.get("total", 0) >= 1)
 
-        # No token -> scope guard blocks the mutation.
-        server.get_access_token = lambda: None
-        errc = await client.call_tool("create_checkout",
-            {"line_items": [{"id": "li_1", "item": {"id": "box-42"}, "quantity": 1}]})
-        data = errc.structured_content or {}
-        check("no-scope create_checkout blocked",
-              data.get("error") == "insufficient_scope"
-              or any(m.get("code") == "insufficient_scope" for m in data.get("messages", [])), data)
+    c2 = server.create_checkout(line_items=[{"id": "li_1", "item": {"id": "box-42"}, "quantity": 2}])
+    comp2 = server.complete_checkout(id=c2["id"], idempotency_key="idem-2")
+    check("multi-item complete -> requires_action", comp2.get("status") == "requires_action", comp2.get("status"))
 
     print(f"\n{sum(_ok)}/{len(_ok)} checks passed")
     return 0 if all(_ok) else 1

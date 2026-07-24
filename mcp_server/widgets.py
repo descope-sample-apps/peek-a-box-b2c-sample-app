@@ -31,6 +31,8 @@ Spec references:
   * MCP Apps (SEP-1865): https://blog.modelcontextprotocol.io/posts/2026-01-26-mcp-apps/
 """
 
+from fastmcp.apps import AppConfig
+
 from _fonts import FONT_FACE_CSS  # embedded, subsetted Geist (see scripts/subset_fonts.py)
 
 # The storefront box mark (public/Peek-A-Box_icon-light.svg), recolored via
@@ -170,14 +172,19 @@ body{
   padding:3px 11px;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.05em}
 
 .actions{display:flex;gap:10px;margin-top:18px;flex-wrap:wrap}
-.btn{appearance:none;cursor:pointer;border-radius:999px;font-weight:500;font-size:14px;
-  padding:11px 18px;border:0;flex:1;min-width:150px;text-align:center;
-  transition:filter .15s ease,background .15s ease,transform .05s ease;font-family:inherit}
+.btn{appearance:none;cursor:pointer;border-radius:999px;font-weight:500;font-size:15px;
+  padding:13px 18px;border:0;flex:1;min-width:150px;
+  display:inline-flex;align-items:center;justify-content:center;gap:8px;
+  transition:opacity .15s ease,background .15s ease,transform .05s ease;font-family:inherit}
+.btn svg{width:15px;height:15px;flex:0 0 auto}
 .btn:active{transform:translateY(1px)}
-.btn.primary{background:var(--primary);color:var(--primary-fg)}
-.btn.primary:hover{filter:brightness(.94)}
+/* Primary = the storefront's commit CTA: a dark foreground pill (cf. the cart's
+   "Place order" button, bg-foreground / text-background). */
+.btn.primary{background:var(--fg);color:var(--bg)}
+.btn.primary:hover{opacity:.9}
+/* Secondary = the storefront's bordered pill (border-2 border-foreground/20). */
 .btn.outline{background:transparent;color:var(--fg);
-  border:1.5px solid color-mix(in oklch, var(--fg) 22%, transparent)}
+  border:2px solid color-mix(in oklch, var(--fg) 20%, transparent)}
 .btn.outline:hover{background:color-mix(in oklch, var(--muted) 70%, transparent)}
 .btn[disabled]{opacity:.6;cursor:default}
 .empty{color:var(--muted-fg);text-align:center;padding:30px 18px;font-size:14.5px;font-style:italic}
@@ -268,6 +275,7 @@ _BRIDGE = r"""
 
   // ── Shared helpers ──────────────────────────────────────────────────────
   PAB.LOGO = '__LOGO_SVG__';
+  PAB.EXT = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h6v6M10 14 21 3M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h6"/></svg>';
   PAB.money = function (cents, cur) {
     cur = cur || 'USD';
     var v = (Number(cents) || 0) / 100;
@@ -381,9 +389,9 @@ function render(){
     +   (multi ? '<div class="note">Carts with more than one item are confirmed in the browser for your security.</div>' : '')
     +   '<div class="actions">'
     +     (multi
-        ? '<button class="btn primary" data-open>Review &amp; pay in browser</button>'
+        ? '<button class="btn primary" data-open>Review cart &amp; check out'+PAB.EXT+'</button>'
         : '<button class="btn primary" data-complete>Complete purchase</button>'
-          + '<button class="btn outline" data-open>Open in browser</button>')
+          + '<button class="btn outline" data-open>Review cart in browser'+PAB.EXT+'</button>')
     +   '</div>'
     + '</div>';
 
@@ -412,7 +420,7 @@ function render(){
     var e = errs[0];
     root.innerHTML = '<div class="panel"><div class="phead"><div class="tilesm">'+PAB.LOGO+'</div>'
       + '<div><h2>Payment didn’t go through</h2><p>'+PAB.esc(e.content||'')+'</p></div></div>'
-      + (c.continue_url?'<div class="actions"><button class="btn primary" data-open>Try in browser</button></div>':'')
+      + (c.continue_url?'<div class="actions"><button class="btn primary" data-open>Try in browser'+PAB.EXT+'</button></div>':'')
       + '</div>';
     var ob = root.querySelector('[data-open]'); if (ob) ob.addEventListener('click', function(){PAB.openLink(c.continue_url);});
     return;
@@ -421,7 +429,7 @@ function render(){
   if (c.status && c.status !== 'completed'){
     root.innerHTML = '<div class="panel"><div class="phead"><div class="tilesm">'+PAB.LOGO+'</div>'
       + '<div><h2>One more step</h2><p>'+PAB.esc((c.messages&&c.messages[0]&&c.messages[0].content)||'Finish this order in your browser.')+'</p></div></div>'
-      + '<div class="actions"><button class="btn primary" data-open>Continue in browser</button></div></div>';
+      + '<div class="actions"><button class="btn primary" data-open>Continue in browser'+PAB.EXT+'</button></div></div>';
     root.querySelector('[data-open]').addEventListener('click', function(){PAB.openLink(c.continue_url);});
     return;
   }
@@ -440,7 +448,7 @@ function render(){
     +   '<div class="dr"><span class="k">Status</span><span class="chip">Completed</span></div>'
     + '</div>'
     + (simulated ? '<div class="note">Demo mode: no Stripe key configured, so the charge was simulated.</div>' : '')
-    + (link ? '<div class="actions"><button class="btn primary" data-view>View your order</button></div>' : '');
+    + (link ? '<div class="actions"><button class="btn primary" data-view>View your order'+PAB.EXT+'</button></div>' : '');
   var vb = root.querySelector('[data-view]');
   if (vb) vb.addEventListener('click', function(){ PAB.openLink(link); });
 }
@@ -499,9 +507,23 @@ def _mcp_app_uri(key: str) -> str:
     return f"ui://widget/{key}.mcp-app.html"
 
 
+def widget_app(key: str) -> AppConfig:
+    """The MCP Apps (SEP-1865) config for a widget tool.
+
+    Passed as `@mcp.tool(app=...)`. FastMCP serializes this into the tool's
+    `_meta.ui.resourceUri` AND makes the server advertise the
+    `io.modelcontextprotocol/ui` capability at initialize — the negotiation an
+    MCP Apps host (Claude) requires before it will render a `ui://` resource.
+    """
+    return AppConfig(resource_uri=_mcp_app_uri(key))
+
+
 def widget_meta(key: str) -> dict:
-    """Build the tool-descriptor `_meta` that advertises this widget to both
-    ChatGPT (openai/*) and MCP Apps hosts (ui.*)."""
+    """The ChatGPT (OpenAI Apps SDK) half of a widget tool's `_meta`.
+
+    Passed as `@mcp.tool(meta=...)` alongside `app=widget_app(key)`; the two
+    merge, so the descriptor carries both `openai/outputTemplate` (ChatGPT) and
+    `ui.resourceUri` (MCP Apps)."""
     w = WIDGETS[key]
     return {
         "openai/outputTemplate": _skybridge_uri(key),
@@ -509,16 +531,20 @@ def widget_meta(key: str) -> dict:
         "openai/toolInvocation/invoked": w["invoked"],
         "openai/widgetAccessible": True,
         "openai/widgetDescription": w["description"],
-        "ui": {
-            "resourceUri": _mcp_app_uri(key),
-            "prefersBorder": True,
-        },
     }
 
 
 def register_widgets(mcp) -> None:
-    """Register every widget as two resources: `text/html+skybridge` (ChatGPT)
-    and `text/html;profile=mcp-app` (MCP Apps / Claude), serving identical HTML."""
+    """Register each widget as two `ui://` resources serving identical HTML:
+
+    * `…/{key}.mcp-app.html` — via `AppConfig`, mimeType `text/html;profile=mcp-app`,
+      what Claude / MCP Apps hosts fetch (and what advertises the UI capability).
+    * `…/{key}.html` — mimeType `text/html+skybridge`, what ChatGPT fetches from
+      `openai/outputTemplate`.
+
+    The widgets are fully self-contained (inline HTML/CSS/JS + embedded font, no
+    external requests), so no CSP allow-list is needed.
+    """
     def _make(html):
         def _res():
             return html
@@ -526,18 +552,20 @@ def register_widgets(mcp) -> None:
 
     for key, w in WIDGETS.items():
         html = w["html"]
-        meta = widget_meta(key)
-        mcp.resource(
-            _skybridge_uri(key),
-            name=w["title"],
-            description=w["description"],
-            mime_type="text/html+skybridge",
-            meta=meta,
-        )(_make(html))
+        # Claude / MCP Apps view — a bare AppConfig() marks this resource as a UI
+        # view (mimeType text/html;profile=mcp-app) and makes the server advertise
+        # the UI capability. resource_uri belongs on the *tool*, not the view.
         mcp.resource(
             _mcp_app_uri(key),
-            name=w["title"] + " (MCP Apps)",
+            name=w["title"],
             description=w["description"],
-            mime_type="text/html;profile=mcp-app",
-            meta=meta,
+            app=AppConfig(),
+        )(_make(html))
+        # ChatGPT / Apps SDK variant.
+        mcp.resource(
+            _skybridge_uri(key),
+            name=w["title"] + " (ChatGPT)",
+            description=w["description"],
+            mime_type="text/html+skybridge",
+            meta={"openai/outputTemplate": _skybridge_uri(key)},
         )(_make(html))
