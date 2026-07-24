@@ -24,12 +24,22 @@ The catalog, checkout, and order-confirmation widgets are self-contained inline 
 served from `ui://` resources (see [`widgets.py`](widgets.py)). One implementation
 serves **both** ecosystems:
 
-- **Claude / MCP Apps (SEP-1865)** — the tool declares `app=AppConfig(resource_uri=…)`
-  (FastMCP `fastmcp.apps`), which serves the view as `text/html;profile=mcp-app`, sets
-  `_meta.ui.resourceUri`, **and advertises the `io.modelcontextprotocol/ui` capability at
-  `initialize`** — the negotiation Claude requires before it will render a `ui://` resource.
+- **Claude / MCP Apps (SEP-1865)** — this takes **two** registrations per widget (both
+  done by `register_widgets()`), using FastMCP `fastmcp.apps`:
+  1. The view is registered as a resource — `@mcp.resource("ui://…", app=AppConfig())` —
+     which serves it as `text/html;profile=mcp-app` **and advertises the
+     `io.modelcontextprotocol/ui` capability at `initialize`** (the negotiation Claude
+     requires before it will render a `ui://` resource). A bare `AppConfig()` here is what
+     marks the resource as an MCP Apps view; miss it and the `ui://` resource ships without
+     its MCP Apps MIME/metadata.
+  2. The widget tool declares `@mcp.tool(app=AppConfig(resource_uri="ui://…"))`, which only
+     sets `_meta.ui.resourceUri` to point at that view — it does not itself serve the view.
 - **ChatGPT (OpenAI Apps SDK)** — the same tool also carries `_meta["openai/outputTemplate"]`
-  pointing at a `text/html+skybridge` variant, read via `window.openai.toolOutput`.
+  pointing at a **separate** `text/html+skybridge` resource variant, read via
+  `window.openai.toolOutput`.
+
+`register_widgets(mcp)` in `widgets.py` wires both resource variants and both `_meta` keys
+for every widget — the one place to add or change a widget.
 
 A small self-contained in-widget bridge (`window.PAB`) normalizes the two host APIs — it
 reads `window.openai` (ChatGPT) or the MCP Apps `ui/notifications/tool-result` postMessage
