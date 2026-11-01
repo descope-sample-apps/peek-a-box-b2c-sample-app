@@ -45,6 +45,19 @@ Use this to try the app with your own Descope project and flows without forking 
 
    Open [http://localhost:3000](http://localhost:3000).
 
+## Google One Tap
+
+The store page shows [Google One Tap](https://developers.google.com/identity/gsi/web/guides/display-google-one-tap) once the welcome popup is closed. One Tap needs your own Google OAuth client (Descope's default Google credentials don't support it).
+
+1. In [Google Cloud](https://console.cloud.google.com/auth/clients), create an OAuth client of type "Web application":
+   - Authorized JavaScript origins: `http://localhost` and `http://localhost:3000`
+   - Authorized redirect URIs: `http://localhost:3000` and `https://api.descope.com/v1/oauth/callback`
+2. In the Descope console, go to [Authentication Methods -> Social Login](https://app.descope.com/settings/authentication/social):
+   - Set the Trigger Method to "Enable API & SDK" (One Tap is called from the SDK, not from a flow)
+   - Open Google, select "Use my own account", fill in the client ID and secret, add the `Implicit` grant type and save
+
+One Tap is only shown for the project set in `.env`. When you pass a different project in the URL (`?project=...`), One Tap is skipped.
+
 ## E2E tests (Cypress)
 
 1. **First time:** install the Cypress binary (after `npm install`):

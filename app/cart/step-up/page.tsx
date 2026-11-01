@@ -6,9 +6,9 @@ import Link from "next/link"
 import { useTheme } from "next-themes"
 import { motion } from "motion/react"
 import { ArrowLeft } from "lucide-react"
-import { Descope } from "@descope/nextjs-sdk"
 import { useSession } from "@descope/nextjs-sdk/client"
 import { AppNav } from "@/components/app-nav"
+import { DescopeFlow } from "@/components/descope-flow"
 
 /**
  * Step-up authentication: re-validate the user before proceeding to order confirmation.
@@ -59,10 +59,11 @@ export default function CartStepUpPage() {
           animate={{ opacity: 1, y: 0 }}
         >
           {/* Create a step-up flow in Descope Console; use its flow ID here */}
-          <Descope
+          <DescopeFlow
             flowId="step-up"
             onSuccess={handleSuccess}
             theme={theme}
+            loadingText="Loading verification..."
           />
         </motion.div>
       </main>

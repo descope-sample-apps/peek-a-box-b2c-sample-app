@@ -5,10 +5,10 @@ import { useRouter, useSearchParams } from "next/navigation"
 import Link from "next/link"
 import { useTheme } from "next-themes"
 import { motion } from "motion/react"
-import { Descope } from "@descope/nextjs-sdk"
 import { useSession } from "@descope/nextjs-sdk/client"
 import { ArrowLeft } from "lucide-react"
 import { useDescopeFlowAndProjectIds } from "@/lib/descope-client"
+import { DescopeFlow } from "@/components/descope-flow"
 
 export default function LoginPage() {
   const router = useRouter()
@@ -83,10 +83,11 @@ export default function LoginPage() {
         >
           {/* The Descope flow component used to authenticate the user. */}
           <div className="w-full max-w-sm">
-            <Descope
+            <DescopeFlow
               flowId={flowId}
               onSuccess={handleSuccess}
               theme={theme}
+              loadingText="Loading sign in..."
             />
           </div>
         </motion.div>
