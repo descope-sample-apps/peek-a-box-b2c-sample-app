@@ -25,13 +25,25 @@ jobs:
       - name: Build
         run: npm run build
 
-      - name: Cypress run
-        uses: cypress-io/github-action@v6
+      # The action's built-in wait-on aborts on the first refused connection
+      # ("Socket closed before the connection was established"), so start the
+      # server and poll it ourselves.
+      - name: Start app
         env:
           NEXT_PUBLIC_DESCOPE_PROJECT_ID: ${{ secrets.NEXT_PUBLIC_DESCOPE_PROJECT_ID }}
+        run: |
+          npm run start &
+          timeout 120 bash -c 'until curl -sf http://localhost:3000 >/dev/null; do sleep 2; done'
+
+      - name: Cypress run
+        uses: cypress-io/github-action@v6
         with:
           install: false
-          start: npm run start
-          wait-on: "http://localhost:3000"
-          wait-on-timeout: 120
           browser: chrome
+
+      - name: Upload screenshots
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cypress-screenshots
+          path: cypress/screenshots

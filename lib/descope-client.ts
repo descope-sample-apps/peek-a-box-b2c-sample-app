@@ -26,6 +26,21 @@ export function getDefaultProjectId(): string {
   return process.env.NEXT_PUBLIC_DESCOPE_PROJECT_ID || ""
 }
 
+/** Cookie the proxy stores a project passed in the URL in (DESCOPE_PROJECT_COOKIE_NAME in descope-server.ts). */
+const PROJECT_COOKIE_NAME = "descope_project_id"
+
+/**
+ * Whether the app runs on its own project (from env) rather than one passed in the URL (`?project=`).
+ */
+export function isUsingDefaultProject(): boolean {
+  if (typeof document === "undefined") return false
+  const cookieProjectId = document.cookie
+    .split("; ")
+    .find((cookie) => cookie.startsWith(`${PROJECT_COOKIE_NAME}=`))
+    ?.split("=")[1]
+  return !cookieProjectId || cookieProjectId === getDefaultProjectId()
+}
+
 /**
  * Hook that resolves Descope flow ID and project ID from URL search params and localStorage,
  * syncs them to localStorage, and clears the session when either changes.

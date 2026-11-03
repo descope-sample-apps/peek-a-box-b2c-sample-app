@@ -2,12 +2,14 @@
 
 import { useEffect, useRef, useCallback } from "react"
 import { useDescope, useSession } from "@descope/nextjs-sdk/client"
+import { isUsingDefaultProject } from "@/lib/descope-client"
 
 const WELCOME_DISMISSED_KEY = "descope-b2c-welcome-dismissed"
 
 /**
  * Descope Google One Tap: shows Google's one-click sign-in when user is not authenticated.
- * Only runs after the welcome popup has been dismissed.
+ * Only runs after the welcome popup has been dismissed, and only on the app's own project:
+ * a project passed in the URL may use Descope's default Google provider, which doesn't support One Tap.
  * Requires Google OAuth provider with Implicit grant in Descope Console.
  * Renders nothing; only triggers the One Tap prompt.
  */
@@ -18,6 +20,7 @@ export function GoogleOneTap() {
 
   const startOneTap = useCallback(async () => {
     if (oneTapStarted.current) return
+    if (!isUsingDefaultProject()) return
     if (!sdk?.fedcm?.onetap?.requestAuthentication) return
 
     oneTapStarted.current = true
